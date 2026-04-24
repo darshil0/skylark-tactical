@@ -6,13 +6,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle } from 'lucide-react';
-import { Flight, UserPreferences } from '../../types';
+import { Flight, UserPreferences, LiveRadarFlight } from '../../types';
 
 interface HUDProps {
   activeAlerts: Set<string>;
   preferences: UserPreferences;
   liveRadarActive: boolean;
-  liveRadarFlights: any[];
+  liveRadarFlights: LiveRadarFlight[];
   flights: Flight[];
 }
 
