@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-24
+
+### Added
+- **AI Weather Radar Layer**: Integrated live weather system identification using Gemini with Search Grounding; added dynamic radar overlays on the tactical map.
+- **Airspace Sector Visualization**: Added tactical boundaries for major Flight Information Regions (FIRs).
+- **Enhanced Proximity Highlighting**: Active alerts now trigger a pulsing red outline on the map for the specific aircraft causing the alert.
+- **Alert HUD Callsigns**: The proximity warning banner now lists the flight numbers or callsigns of all objects within the alert radius.
+
+### Changed
+- **Robust State Reconstruction**: Implemented automated deep-merging of local storage preferences to prevent crashes when new schema keys (like map layers) are introduced.
+- **UI Performance**: Refined re-render cycles in the Map component for smoother tactical overlays.
+
+### Fixed
+- Resolved "Cannot read properties of undefined (reading 'weather')" crash during initial boot.
+- Fixed a bug where settings toggles would fail if mapLayer preferences were partially missing from local history.
+
 ## [1.2.0] - 2026-04-24
 
 ### Added
