@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-24
+
+### Changed
+- **Architectural Refactor**: Migrated monolithic sections of `App.tsx` into modular layout components (`Sidebar`, `HUD`, `FlightDetailSidebar`) to improve maintainability and performance.
+- **Enhanced Animations**: Improved the flight detail panel transitions using `motion` and `AnimatePresence` for smoother user interaction.
+- **Code Optimization**: Streamlined the main application state and reduced redundant render cycles in the root component.
+
+### Fixed
+- **Runtime Stability**: Resolved `ReferenceError` caused by missing icon imports (`Radio`, `Activity`) in the main application loop.
+- **Sidebar Persistence**: Fixed an issue where the detail sidebar would fail to unmount correctly during state transitions.
+- **Cleaned Orphaned Nodes**: Removed a large block of unused JSX from `App.tsx` that was causing potential hydration mismatches.
+
 ## [1.3.0] - 2026-04-24
 
 ### Added
