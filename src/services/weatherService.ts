@@ -1,7 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 export interface WeatherCell {
   id: string;
   lat: number;
@@ -12,34 +8,12 @@ export interface WeatherCell {
 }
 
 export async function getLiveWeatherOverlay(): Promise<WeatherCell[]> {
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: "Identify the current top 10 most intense weather systems (storms or high precipitation areas) globally. Provide their exact coordinates (lat, lng), intensity (0.1 to 1.0), and estimated radius of प्रभाव (in degrees).",
-    config: {
-      tools: [{ googleSearch: {} }],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            id: { type: Type.STRING },
-            lat: { type: Type.NUMBER },
-            lng: { type: Type.NUMBER },
-            intensity: { type: Type.NUMBER },
-            radius: { type: Type.NUMBER },
-            type: { type: Type.STRING, enum: ['precipitation', 'wind', 'storm'] }
-          },
-          required: ["id", "lat", "lng", "intensity", "radius", "type"]
-        }
-      }
-    }
-  });
-
   try {
-    return JSON.parse(response.text || "[]");
+    const response = await fetch("/api/ai/weather");
+    if (!response.ok) throw new Error("Weather failed");
+    return await response.json();
   } catch (e) {
-    console.error("Failed to parse weather data", e);
+    console.error("Failed to fetch weather data", e);
     return [];
   }
 }
