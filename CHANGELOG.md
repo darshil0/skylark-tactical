@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Security Hardening**: Migrated Gemini AI interactions to server-side proxies to protect sensitive API keys.
+- **Data Validation**: Integrated `zod` for robust schema validation on all API endpoints.
+- **Automated Testing**: Added comprehensive unit and integration tests using Vitest.
+- **CI/CD Pipeline**: Configured GitHub Actions for automated linting and testing on push/pull requests.
+- **Server-side Caching**: Implemented `node-cache` for external API and AI requests to improve performance and reduce rate-limiting.
+- **Robust Identifiers**: Replaced pseudo-random IDs with UUID v4 for better collision resistance.
+
+### Changed
+- **Logic Refactoring**: Extracted complex state and side-effect logic from `App.tsx` into specialized custom hooks (`useFlights`, `useLiveRadar`, `useFlightAlerts`, `useUserLocation`).
+- **Type Safety**: Eliminated `any` types throughout the codebase and enforced stricter TypeScript configurations.
+- **Documentation**: Added JSDoc comments to core utility functions and updated project README.
+
 ## [1.4.0] - 2026-04-24
 
 ### Changed
