@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-04-24
+
 ### Added
 - **Security Hardening**: Migrated Gemini AI interactions to server-side proxies to protect sensitive API keys.
 - **Data Validation**: Integrated `zod` for robust schema validation on all API endpoints.
