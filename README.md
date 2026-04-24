@@ -1,11 +1,35 @@
-<div align="center">
+# SkyTrack - Tactical Flight Surveillance System
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+SkyTrack is a high-performance, real-time flight tracking application built with React, Vite, and D3.js. It features a tactical, air traffic control-inspired interface for monitoring global aviation data.
 
-  <h1>Built with AI Studio</h2>
+## Features
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+-   **Tactical Map Interface**: A high-contrast, black-ops style map built with D3.js, supporting natural earth projections, smooth zooming, and **animated flight trajectories** that correlate with aircraft progress.
+-   **Intelligent Proximity Alerts**: Real-time detection of aircraft within a user-defined radius (up to 250NM), featuring heads-up visual warnings and optional audible synthesizer tones.
+-   **Live Radar Ingestion**: Real-time flight data fetching from ADSB-Exchange and Google Search Grounding to provide current aircraft positions.
+-   **AI-Powered Search**: Natural language search capabilities powered by Gemini 1.5 Flash to find specific flights or simulate data.
+-   **ATC Communication Decryption**: Anonymized, simulated ATC transcripts based on current flight sectors for enhanced situational awareness.
+-   **Flight Management**: Full CRUD operations for managing a personal database of tracked flights.
+-   **Deep Linking & Sharing**: Easily share specific flight tracking data via generated URLs.
+-   **Adaptive Mobile Experience**: Fully optimized for mobile with a collapsible flight manifest and specialized touch interactions.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Technical Stack
 
-</div>
+-   **Frontend**: React 18, Vite, Tailwind CSS
+-   **Animations**: Motion (`motion/react`)
+-   **Data Visualization**: D3.js, Recharts
+-   **AI Engine**: Google Generative AI (Gemini) with Search Grounding
+-   **Icons**: Lucide React
+-   **Styling**: Modern Tactical UI (Black-ops aesthetic)
+
+## Getting Started
+
+1.  **Clone the repository**.
+2.  **Install dependencies**: `npm install`
+3.  **Set up environment**: Define `GEMINI_API_KEY` in your environment.
+4.  **Run development server**: `npm run dev`
+5.  **Build for production**: `npm run build`
+
+## License
+
+MIT

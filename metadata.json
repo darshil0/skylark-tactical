@@ -1,0 +1,8 @@
+{
+  "name": "SkyTrack",
+  "description": "A high-precision real-time flight tracking dashboard with AI-powered search and global aviation maps.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
