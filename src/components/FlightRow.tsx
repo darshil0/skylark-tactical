@@ -16,14 +16,22 @@ export const FlightRow: React.FC<FlightRowProps> = ({ flight, isSelected, onSele
 
   return (
     <motion.div 
-      whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+      whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onSelect(flight.id)}
       className={cn(
-        "group grid grid-cols-[60px_1fr_1.5fr_100px] items-center gap-4 p-4 border-b border-gray-800 cursor-pointer transition-all",
-        isSelected && "bg-blue-600/10 border-l-[3px] border-l-blue-500"
+        "group relative grid grid-cols-[60px_1fr_1.5fr_100px] items-center gap-4 p-4 border-b border-gray-800/50 cursor-pointer transition-all overflow-hidden",
+        isSelected && "bg-blue-600/10 border-l-[3px] border-l-blue-500 shadow-[inset_10px_0_20px_-10px_rgba(59,130,246,0.2)]"
       )}
     >
+      {isSelected && (
+        <motion.div 
+          initial={{ top: '-100%' }}
+          animate={{ top: '100%' }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="absolute left-0 right-0 h-[2px] bg-blue-500/20 z-10 pointer-events-none"
+        />
+      )}
       <div className="flex flex-col items-center justify-center bg-gray-900 rounded aspect-square w-10 mx-auto border border-gray-800 relative">
         {isLive && (
           <div className="absolute -top-1 -right-1 flex h-2 w-2">

@@ -425,7 +425,14 @@ export default function App() {
               </div>
            </div>
            <div className="flex items-center gap-4 text-gray-600">
-              <span className="hidden lg:inline text-blue-500/50">SYSTEM_UPTIME: {Math.floor(performance.now()/1000)}s</span>
+               <div className="flex items-center gap-2">
+                  <div className="relative flex h-2 w-2">
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </div>
+                  <span className="text-emerald-500 font-bold text-[9px]">SYSTEMS_OPERATIONAL</span>
+               </div>
+               <span className="hidden lg:inline text-blue-500/50">SYSTEM_UPTIME: {Math.floor(performance.now()/1000)}s</span>
               <span className="text-white">UTC {new Date().toISOString().split('T')[1].split('.')[0]}</span>
            </div>
         </div>

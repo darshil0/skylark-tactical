@@ -67,13 +67,33 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="fixed lg:absolute top-0 right-0 w-full lg:w-80 h-full bg-[#0B0F19]/95 backdrop-blur-xl border-l border-gray-800 shadow-2xl z-40 flex flex-col"
+      className="fixed lg:absolute top-0 right-0 w-full lg:w-80 h-full bg-[#0B0F19]/95 backdrop-blur-xl border-l border-gray-800 shadow-2xl z-40 flex flex-col overflow-hidden"
     >
-        <header className="p-6 border-b border-gray-800 flex justify-between items-start">
+      {/* Scanline Effect */}
+      <div className="absolute inset-0 pointer-events-none z-50 opacity-[0.03] select-none">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+      </div>
+
+      <motion.div 
+        initial={{ top: '-100%' }}
+        animate={{ top: '100%' }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        className="absolute left-0 right-0 h-[100px] bg-gradient-to-b from-transparent via-blue-500/5 to-transparent z-10 pointer-events-none"
+      />
+
+        <header className="p-6 border-b border-gray-800 flex justify-between items-start relative z-20">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-white italic tracking-tighter leading-none">
-              {selectedLiveFlight ? (selectedLiveFlight.callsign || `ICAO:${selectedLiveFlight.id}`) : (selectedFlight?.flightNumber || 'N/A')}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-black text-white italic tracking-tighter leading-none">
+                {selectedLiveFlight ? (selectedLiveFlight.callsign || `ICAO:${selectedLiveFlight.id}`) : (selectedFlight?.flightNumber || 'N/A')}
+              </h2>
+              {isLive && (
+                <div className="flex items-center gap-1 bg-red-600/20 px-1.5 py-0.5 rounded border border-red-500/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[7px] font-black text-red-500 uppercase tracking-tighter">LIVE</span>
+                </div>
+              )}
+            </div>
             <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold">
               {selectedLiveFlight ? `REG: ${selectedLiveFlight.id.toUpperCase()}` : (selectedFlight?.airline || 'UNKNOWN AIRLINE')}
             </span>

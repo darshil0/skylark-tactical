@@ -24,7 +24,16 @@ export const HUD: React.FC<HUDProps> = ({
   flights 
 }) => {
   return (
-    <AnimatePresence>
+    <>
+      {/* Tactical Corner Brackets */}
+      <div className="absolute inset-0 pointer-events-none z-30 opacity-20">
+        <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-blue-500 rounded-tl-sm" />
+        <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-blue-500 rounded-tr-sm" />
+        <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-blue-500 rounded-bl-sm" />
+        <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-blue-500 rounded-br-sm" />
+      </div>
+
+      <AnimatePresence>
       {activeAlerts.size > 0 && preferences.notifications.proximityAlerts && (
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -54,5 +63,6 @@ export const HUD: React.FC<HUDProps> = ({
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 };

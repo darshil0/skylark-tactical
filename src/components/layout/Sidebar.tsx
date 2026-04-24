@@ -50,10 +50,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside className={cn(
-      "fixed inset-y-0 left-0 lg:relative lg:translate-x-0 w-full md:w-[450px] flex flex-col border-r border-gray-800 z-30 bg-[#0B0F19] transition-transform duration-300 ease-in-out",
+      "fixed inset-y-0 left-0 lg:relative lg:translate-x-0 w-full md:w-[450px] flex flex-col border-r border-gray-800 z-30 bg-[#0B0F19] transition-transform duration-300 ease-in-out overflow-hidden",
       !isMobileListOpen && "-translate-x-full lg:translate-x-0"
     )}>
-      <header className="p-6 border-b border-gray-800 space-y-4">
+      {/* Background Grid Pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff10_1px,transparent_1px)] bg-[size:20px_20px]" />
+      </div>
+
+      <header className="p-6 border-b border-gray-800 space-y-4 relative z-10 bg-[#0B0F19]/50 backdrop-blur-md">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-600 rounded flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] border border-blue-400/20">
@@ -207,25 +212,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </section>
 
-      <footer className="p-4 border-t border-gray-800 bg-[#080B14]">
-         <div className="grid grid-cols-2 gap-4">
+      <footer className="p-4 border-t border-gray-800 bg-[#080B14] relative z-20">
+         <div className="grid grid-cols-2 gap-4 mb-3">
             <div className="space-y-1">
                <span className="text-[9px] font-mono text-gray-600 uppercase block">
                  {liveRadarActive ? "Signal Strength" : "Memory Buffer"}
                </span>
                <div className="h-1 w-full bg-gray-900 rounded-full overflow-hidden">
                   <motion.div 
-                    className={cn("h-full", liveRadarActive ? "bg-emerald-500" : "bg-blue-500/50")}
+                    className={cn("h-full", liveRadarActive ? "bg-blue-400" : "bg-emerald-500/50")}
                     animate={{ width: liveRadarActive ? ['70%', '95%', '85%', '100%'] : ['20%', '60%', '40%', '80%', '30%'] }}
                     transition={{ duration: liveRadarActive ? 2 : 10, repeat: Infinity }}
                   />
                </div>
             </div>
             <div className="space-y-1 text-right">
-               <span className="text-[9px] font-mono text-gray-600 uppercase block">Status</span>
-               <span className="text-[10px] font-mono text-emerald-500/70">
-                  {liveRadarActive ? "ADS-B LIVE" : "DB STANDBY"}
+               <span className="text-[9px] font-mono text-gray-600 uppercase block">Data Integrity</span>
+               <span className={cn("text-[10px] font-mono", liveRadarActive ? "text-blue-400" : "text-emerald-500/70")}>
+                  {liveRadarActive ? "ENCRYPTED" : "VERIFIED"}
                </span>
+            </div>
+         </div>
+         <div className="flex justify-between items-center text-[8px] font-mono text-gray-700 uppercase tracking-tighter">
+            <div className="flex gap-3">
+               <span>LAT: {liveRadarFlights[0]?.lat?.toFixed(4) || "0.0000"}</span>
+               <span>LNG: {liveRadarFlights[0]?.lng?.toFixed(4) || "0.0000"}</span>
+            </div>
+            <div className="flex items-center gap-1">
+               <div className="w-1.5 h-1.5 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <div className="w-0.5 h-0.5 rounded-full bg-blue-500" />
+               </div>
+               SYSTEM_UPTIME: 124H_42M
             </div>
          </div>
       </footer>
