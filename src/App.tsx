@@ -12,7 +12,8 @@ import { FlightDetailSidebar } from './components/layout/FlightDetailSidebar';
 import { HUD } from './components/layout/HUD';
 import { Flight, UserLocation, UserPreferences } from './types';
 import { getInitialFlights, searchFlights, getFlightTelemetry } from './services/geminiService';
-import { Terminal } from 'lucide-react';
+import { Terminal, Radio, Activity } from 'lucide-react';
+import { AnimatePresence } from 'motion/react';
 import { clsx as cn } from 'clsx';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
@@ -393,14 +394,18 @@ export default function App() {
             activeAlerts={activeAlerts}
            />
            
-           <FlightDetailSidebar 
-             isSidebarOpen={isSidebarOpen}
-             setIsSidebarOpen={setIsSidebarOpen}
-             selectedFlight={selectedFlight}
-             selectedLiveFlight={selectedLiveFlight}
-             handleShareFlight={handleShareFlight}
-             preferences={preferences}
-           />
+           <AnimatePresence>
+             {isSidebarOpen && (selectedFlight || selectedLiveFlight) && (
+               <FlightDetailSidebar 
+                 isSidebarOpen={isSidebarOpen}
+                 setIsSidebarOpen={setIsSidebarOpen}
+                 selectedFlight={selectedFlight}
+                 selectedLiveFlight={selectedLiveFlight}
+                 handleShareFlight={handleShareFlight}
+                 preferences={preferences}
+               />
+             )}
+           </AnimatePresence>
 
 
                           
@@ -449,6 +454,4 @@ export default function App() {
     </div>
   );
 }
-
-const cn = (...inputs: any[]) => inputs.filter(Boolean).join(' ');
 

@@ -28,8 +28,6 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
   handleShareFlight,
   preferences
 }) => {
-  if (!isSidebarOpen || (!selectedFlight && !selectedLiveFlight)) return null;
-
   const isLive = !!selectedLiveFlight;
 
   const getAltValue = () => {
@@ -64,14 +62,13 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      <motion.div 
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed lg:absolute top-0 right-0 w-full lg:w-80 h-full bg-[#0B0F19]/95 backdrop-blur-xl border-l border-gray-800 shadow-2xl z-40 flex flex-col"
-      >
+    <motion.div 
+      initial={{ x: '100%', opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: '100%', opacity: 0 }}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      className="fixed lg:absolute top-0 right-0 w-full lg:w-80 h-full bg-[#0B0F19]/95 backdrop-blur-xl border-l border-gray-800 shadow-2xl z-40 flex flex-col"
+    >
         <header className="p-6 border-b border-gray-800 flex justify-between items-start">
           <div className="space-y-1">
             <h2 className="text-2xl font-black text-white italic tracking-tighter leading-none">
@@ -208,6 +205,5 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
             {/* ... Rest of the details content would go here if needed ... */}
         </div>
       </motion.div>
-    </AnimatePresence>
   );
 };
