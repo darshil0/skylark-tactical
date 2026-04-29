@@ -6,13 +6,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle } from 'lucide-react';
-import { Flight, UserPreferences, LiveRadarFlight } from '../../types';
+import { Flight, UserPreferences } from '../../types';
 
 interface HUDProps {
   activeAlerts: Set<string>;
   preferences: UserPreferences;
   liveRadarActive: boolean;
-  liveRadarFlights: LiveRadarFlight[];
+  liveRadarFlights: any[];
   flights: Flight[];
 }
 
@@ -31,6 +31,33 @@ export const HUD: React.FC<HUDProps> = ({
         <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-blue-500 rounded-tr-sm" />
         <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-blue-500 rounded-bl-sm" />
         <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-blue-500 rounded-br-sm" />
+      </div>
+
+      {/* Telemetry Ticker Overlay */}
+      <div className="absolute top-0 left-0 right-0 h-8 bg-blue-500/5 backdrop-blur-sm border-b border-blue-500/10 flex items-center overflow-hidden z-40 px-4">
+         <motion.div 
+           animate={{ x: [0, -1000] }}
+           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+           className="flex whitespace-nowrap text-[8px] font-mono text-blue-400 gap-8 uppercase tracking-[0.2em]"
+         >
+            <span>ACTIVE_RADAR_FEED_CONNECTED</span>
+            <span>•</span>
+            <span>ENCRYPTED_DATA_LINK_ESTABLISHED</span>
+            <span>•</span>
+            <span>SATELLITE_UPLINK_STABLE</span>
+            <span>•</span>
+            <span>ADS-B_DECODING_NORMAL</span>
+            <span>•</span>
+            <span>TERRAIN_AVOIDANCE_ACTIVE</span>
+            <span>•</span>
+            <span>SYSTEM_READY</span>
+            <span>•</span>
+            <span>LAT_LNG_LOCK_CONFIRMED</span>
+            <span>•</span>
+            <span>VIRTUAL_AIRSPACE_SYNCED</span>
+            <span>•</span>
+            <span>WEATHER_OVERLAY_SYNCHRONIZED</span>
+         </motion.div>
       </div>
 
       <AnimatePresence>

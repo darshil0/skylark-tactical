@@ -9,13 +9,13 @@ import { Share2, X, Activity, Wind, Navigation, Info, Radio } from 'lucide-react
 import { format } from 'date-fns';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { clsx as cn } from 'clsx';
-import { Flight, UserPreferences, LiveRadarFlight } from '../../types';
+import { Flight, UserPreferences } from '../../types';
 
 interface FlightDetailSidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   selectedFlight?: Flight;
-  selectedLiveFlight?: LiveRadarFlight;
+  selectedLiveFlight?: any;
   handleShareFlight: () => void;
   preferences: UserPreferences;
 }

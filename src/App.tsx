@@ -10,15 +10,11 @@ import { SettingsModal } from './components/SettingsModal';
 import { Sidebar } from './components/layout/Sidebar';
 import { FlightDetailSidebar } from './components/layout/FlightDetailSidebar';
 import { HUD } from './components/layout/HUD';
-import { Flight, UserPreferences } from './types';
-import { searchFlights } from './services/geminiService';
+import { Flight, UserLocation, UserPreferences } from './types';
+import { getInitialFlights, searchFlights, getFlightTelemetry } from './services/geminiService';
 import { Terminal, Radio, Activity } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { clsx as cn } from 'clsx';
-import { useFlights } from './hooks/useFlights';
-import { useLiveRadar } from './hooks/useLiveRadar';
-import { useFlightAlerts } from './hooks/useFlightAlerts';
-import { useUserLocation } from './hooks/useUserLocation';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   units: {
@@ -41,28 +37,17 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 };
 
 export default function App() {
-  const {
-    flights,
-    setFlights,
-    isSearching,
-    setIsSearching,
-    selectedFlightId,
-    setSelectedFlightId,
-    fetchFlights,
-    saveFlight,
-    deleteFlight,
-  } = useFlights();
-
-  const [liveRadarActive, setLiveRadarActive] = useState(false);
-  const { liveRadarFlights, fetchLiveRadar } = useLiveRadar(liveRadarActive);
-  const { userLocation } = useUserLocation();
-
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [selectedFlightId, setSelectedFlightId] = useState<string | undefined>();
+  const [isSearching, setIsSearching] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileListOpen, setIsMobileListOpen] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [editingFlight, setEditingFlight] = useState<Flight | undefined>();
-
+  const [liveRadarActive, setLiveRadarActive] = useState(false);
+  const [liveRadarFlights, setLiveRadarFlights] = useState<any[]>([]);
+  const [userLocation, setUserLocation] = useState<UserLocation | undefined>();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     const saved = localStorage.getItem('skytrack_preferences');
     if (saved) {
@@ -83,7 +68,91 @@ export default function App() {
     return DEFAULT_PREFERENCES;
   });
 
-  const { activeAlerts } = useFlightAlerts(flights, liveRadarFlights, userLocation, preferences);
+  const [activeAlerts, setActiveAlerts] = useState<Set<string>>(new Set());
+  const [isTelemetryLoading, setIsTelemetryLoading] = useState(false);
+
+  // Haversine distance in Nautical Miles
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 3440.065; // Earth radius in NM
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const playAlertSound = useCallback(() => {
+    if (!preferences.notifications.audibleAlerts) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+      
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {
+      console.warn("Audio Context blocked or unsupported");
+    }
+  }, [preferences.notifications.audibleAlerts]);
+
+  useEffect(() => {
+    if (!preferences.notifications.proximityAlerts || !userLocation) {
+      if (activeAlerts.size > 0) setActiveAlerts(new Set());
+      return;
+    }
+    
+    const allFlights = [...flights];
+    liveRadarFlights.forEach(f => {
+      allFlights.push({
+        id: f.id,
+        flightNumber: f.callsign || f.id,
+        currentPosition: { lat: f.lat, lng: f.lng }
+      } as any);
+    });
+
+    const newAlerts = new Set<string>();
+    let hasBrandNewAlert = false;
+
+    allFlights.forEach(flight => {
+      if (!flight.currentPosition) return;
+      const dist = calculateDistance(
+        userLocation.lat, 
+        userLocation.lng, 
+        flight.currentPosition.lat, 
+        flight.currentPosition.lng
+      );
+
+      if (dist <= preferences.notifications.proximityRadius) {
+        newAlerts.add(flight.id);
+        if (!activeAlerts.has(flight.id)) {
+          hasBrandNewAlert = true;
+        }
+      }
+    });
+
+    if (hasBrandNewAlert) {
+      playAlertSound();
+    }
+
+    // Check if alerts actually changed before updating state to avoid infinite loops
+    const alertsChanged = newAlerts.size !== activeAlerts.size || Array.from(newAlerts).some(id => !activeAlerts.has(id));
+    if (alertsChanged) {
+      setActiveAlerts(newAlerts);
+    }
+  }, [flights, liveRadarFlights, userLocation, preferences.notifications.proximityAlerts, preferences.notifications.proximityRadius, playAlertSound, activeAlerts]); // activeAlerts stays here but logic above prevents loop
 
   const handleSavePreferences = (newPrefs: UserPreferences) => {
     setPreferences(newPrefs);
@@ -93,6 +162,98 @@ export default function App() {
   const selectedFlight = flights.find(f => f.id === selectedFlightId);
   const selectedLiveFlight = liveRadarFlights.find(f => f.id === selectedFlightId);
 
+  const fetchFlights = async () => {
+    try {
+      const res = await fetch('/api/flights');
+      if (res.ok) {
+        const data = await res.json();
+        setFlights(data);
+        if (data.length > 0 && !selectedFlightId && !liveRadarActive) setSelectedFlightId(data[0].id);
+      }
+    } catch (err) {
+      console.error("Failed to fetch from API", err);
+    }
+  };
+
+  const fetchLiveRadar = async () => {
+    try {
+      const res = await fetch('/api/external/live-flights');
+      if (res.ok) {
+        const data = await res.json();
+        setLiveRadarFlights(data);
+      }
+    } catch (err) {
+      console.error("Live Radar fetch failed", err);
+    }
+  };
+
+  useEffect(() => {
+    let interval: any;
+    if (liveRadarActive) {
+      fetchLiveRadar();
+      interval = setInterval(fetchLiveRadar, 15000); // 15s polling
+    } else {
+      setLiveRadarFlights([]);
+    }
+    return () => clearInterval(interval);
+  }, [liveRadarActive]);
+
+  const getUserLocation = useCallback(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    getUserLocation();
+    
+    const initializeData = async () => {
+      try {
+        const res = await fetch('/api/flights');
+        if (res.ok) {
+          const data = await res.json();
+          setFlights(data);
+          
+          if (data.length === 0) {
+            setIsSearching(true);
+            const aiData = await getInitialFlights();
+            for (const f of aiData) {
+              await fetch('/api/flights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(f)
+              });
+            }
+            // Final refresh
+            const finalRes = await fetch('/api/flights');
+            if (finalRes.ok) {
+              const finalData = await finalRes.json();
+              setFlights(finalData);
+              if (finalData.length > 0 && !selectedFlightId) setSelectedFlightId(finalData[0].id);
+            }
+            setIsSearching(false);
+          } else if (data.length > 0 && !selectedFlightId) {
+            setSelectedFlightId(data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Initialization failed", err);
+      }
+    };
+    
+    initializeData();
+  }, [getUserLocation]);
+
   useEffect(() => {
     // Handle deep linking for shared flights
     const params = new URLSearchParams(window.location.search);
@@ -101,7 +262,23 @@ export default function App() {
       setSelectedFlightId(sharedFlightId);
       setIsSidebarOpen(true);
     }
-  }, [setSelectedFlightId]);
+  }, []);
+
+  useEffect(() => {
+    // Handle telemetry fetching for selected flight
+    const flight = flights.find(f => f.id === selectedFlightId);
+    if (flight && !flight.telemetry && !isTelemetryLoading) {
+      const fetchTelemetry = async () => {
+        setIsTelemetryLoading(true);
+        const telemetry = await getFlightTelemetry(flight);
+        if (telemetry) {
+          setFlights(prev => prev.map(f => f.id === flight.id ? { ...f, telemetry } : f));
+        }
+        setIsTelemetryLoading(false);
+      };
+      fetchTelemetry();
+    }
+  }, [selectedFlightId, flights, isTelemetryLoading]);
 
   const handleShareFlight = async () => {
     const flight = flights.find(f => f.id === selectedFlightId) || 
@@ -109,6 +286,7 @@ export default function App() {
     
     if (!flight) return;
 
+    // Use shared URL if available, else current origin
     const shareUrl = `${window.location.origin}${window.location.pathname}?flightId=${flight.id}`;
     const shareTitle = `Track Flight ${flight.flightNumber || flight.id} on SkyTrack`;
     const shareText = `Check out the real-time status of ${flight.flightNumber || flight.id} (${flight.airline}).`;
@@ -126,6 +304,7 @@ export default function App() {
         }
       }
     } else {
+      // Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl);
         alert('Tracking link copied to clipboard!');
@@ -146,9 +325,18 @@ export default function App() {
     setIsSearching(false);
   };
 
-  const handleSaveFlight = async (payload: Partial<Flight>) => {
-    const success = await saveFlight(payload, editingFlight?.id);
-    if (success) {
+  const handleSaveFlight = async (payload: any) => {
+    const url = editingFlight ? `/api/flights/${editingFlight.id}` : '/api/flights';
+    const method = editingFlight ? 'PATCH' : 'POST';
+    
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      await fetchFlights();
       setShowModal(false);
       setEditingFlight(undefined);
     }
@@ -157,14 +345,16 @@ export default function App() {
   const handleDeleteFlight = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Erase flight data from matrix?')) {
-      await deleteFlight(id);
+      await fetch(`/api/flights/${id}`, { method: 'DELETE' });
+      await fetchFlights();
+      if (selectedFlightId === id) setSelectedFlightId(undefined);
     }
   };
 
   const handleSelectFlight = useCallback((id: string) => {
     setSelectedFlightId(id);
     setIsSidebarOpen(true);
-  }, [setSelectedFlightId]);
+  }, []);
 
   return (
     <div className="flex h-screen w-full bg-[#0B0F19] font-sans selection:bg-blue-500/30 overflow-hidden">
@@ -241,6 +431,11 @@ export default function App() {
                />
              )}
            </AnimatePresence>
+
+
+                          
+
+
         </div>
 
         <div className="h-12 bg-black border-t border-gray-800 flex items-center px-4 justify-between font-mono text-[10px]">
@@ -275,7 +470,7 @@ export default function App() {
         {showModal && (
           <FlightModal 
             flight={editingFlight}
-            onClose={() => { setShowModal(false); setEditingFlight(undefined); }}
+            onClose={() => { setShowModal(false); setEditingFlight(undefined); }} // Fix Issue #10
             onSave={handleSaveFlight}
           />
         )}
@@ -291,3 +486,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { Flight, UserLocation, UserPreferences } from '../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useAnimate } from 'motion/react';
 import { getLiveWeatherOverlay, WeatherCell, getAirspaceSectors, AirspaceSector } from '../services/weatherService';
 import { RefreshCw } from 'lucide-react';
 
@@ -14,6 +14,42 @@ interface MapProps {
   preferences: UserPreferences;
   activeAlerts: Set<string>;
 }
+
+const TraversedPath: React.FC<{
+  d: string;
+  progress: number;
+  isSelected: boolean;
+  strokeWidth: number;
+}> = ({ d, progress, isSelected, strokeWidth }) => {
+  const [scope, animate] = useAnimate();
+
+  useEffect(() => {
+    if (!scope.current) return;
+    animate(
+      scope.current,
+      { 
+        pathLength: progress, 
+        opacity: isSelected ? 0.8 : 0.3 
+      },
+      { 
+        duration: 2, 
+        ease: "easeInOut" 
+      }
+    );
+  }, [progress, isSelected, animate, scope]);
+
+  return (
+    <path
+      ref={scope}
+      d={d}
+      fill="none"
+      stroke={isSelected ? '#3B82F6' : '#60A5FA'}
+      strokeWidth={strokeWidth}
+      style={{ pathLength: 0, opacity: 0 }}
+      className="pointer-events-none transition-all duration-500"
+    />
+  );
+};
 
 export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFlight, userLocation, preferences, activeAlerts }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -142,6 +178,20 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
         </defs>
 
         <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`}>
+          {/* Compass Rose (Tactical) */}
+          <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2}) scale(${1/transform.k})`}>
+            <circle r="40" fill="none" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="1,2" opacity="0.1" />
+            <circle r="60" fill="none" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="2,4" opacity="0.05" />
+            {d3.range(0, 360, 45).map(deg => (
+              <line
+                key={deg}
+                x1="0" y1="-65" x2="0" y2="-70"
+                stroke="#3B82F6" strokeWidth="1" opacity="0.2"
+                transform={`rotate(${deg})`}
+              />
+            ))}
+          </g>
+
           {/* Static Map Layer */}
           {worldData && (
             <g className="map-base">
@@ -300,20 +350,11 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
 
                     {/* Path Line - Foreground (Traversed) */}
                     {hasRoute && (
-                      <motion.path
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ 
-                          pathLength: progress,
-                          opacity: isSelected ? 0.8 : 0.3
-                        }}
+                      <TraversedPath 
                         d={flightPathFullD}
-                        fill="none"
-                        stroke={isSelected ? '#3B82F6' : '#60A5FA'}
+                        progress={progress}
+                        isSelected={isSelected}
                         strokeWidth={isSelected ? 2 / transform.k : 1 / transform.k}
-                        transition={{ 
-                          pathLength: { duration: 1.5, ease: "easeInOut" },
-                          opacity: { duration: 0.5 }
-                        }}
                       />
                     )}
 
@@ -400,6 +441,50 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
           )}
         </g>
       </svg>
+
+      {/* Flight Detail Overlay (Tactical View) */}
+      <AnimatePresence>
+        {selectedFlightId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-xl border border-blue-500/30 p-4 rounded-lg shadow-[0_0_50px_rgba(37,99,235,0.2)] z-50 w-64 pointer-events-none"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="text-xl font-bold text-white tracking-tighter italic">
+                  {flights.find(f => f.id === selectedFlightId)?.flightNumber}
+                </h3>
+                <p className="text-[10px] font-mono text-blue-400">TRACKING_ACTIVE</p>
+              </div>
+              <div className="bg-blue-500/20 px-2 py-1 rounded">
+                <span className="text-[10px] font-mono text-blue-400">FLIGHT_LVL: {flights.find(f => f.id === selectedFlightId)?.altitude}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+               <div className="flex justify-between text-[10px] font-mono">
+                  <span className="text-gray-500">SPD</span>
+                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.speed} KT</span>
+               </div>
+               <div className="flex justify-between text-[10px] font-mono">
+                  <span className="text-gray-500">HDG</span>
+                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.currentPosition?.heading}°</span>
+               </div>
+               <div className="w-full h-[1px] bg-gray-800" />
+               <div className="flex justify-between text-[10px] font-mono">
+                  <span className="text-gray-500">ORIG</span>
+                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.origin.code}</span>
+               </div>
+               <div className="flex justify-between text-[10px] font-mono">
+                  <span className="text-gray-500">DEST</span>
+                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.destination.code}</span>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Radar Overlay Scan (Pure CSS animation for zero JS overhead) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">

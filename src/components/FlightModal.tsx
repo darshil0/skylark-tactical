@@ -20,7 +20,7 @@ const flightInputSchema = z.object({
 interface FlightModalProps {
   flight?: Flight;
   onClose: () => void;
-  onSave: (data: Partial<Flight>) => Promise<void>;
+  onSave: (data: any) => Promise<void>;
 }
 
 export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSave }) => {

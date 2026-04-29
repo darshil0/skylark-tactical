@@ -2,34 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-## [1.5.0] - 2026-04-24
-
-### Added
-- **Security Hardening**: Migrated Gemini AI interactions to server-side proxies to protect sensitive API keys.
-- **Data Validation**: Integrated `zod` for robust schema validation on all API endpoints.
-- **Automated Testing**: Added comprehensive unit and integration tests using Vitest.
-- **CI/CD Pipeline**: Configured GitHub Actions for automated linting and testing on push/pull requests.
-- **Server-side Caching**: Implemented `node-cache` for external API and AI requests to improve performance and reduce rate-limiting.
-- **Robust Identifiers**: Replaced pseudo-random IDs with UUID v4 for better collision resistance.
-
-### Changed
-- **Logic Refactoring**: Extracted complex state and side-effect logic from `App.tsx` into specialized custom hooks (`useFlights`, `useLiveRadar`, `useFlightAlerts`, `useUserLocation`).
-- **Type Safety**: Eliminated `any` types throughout the codebase and enforced stricter TypeScript configurations.
-- **Documentation**: Added JSDoc comments to core utility functions and updated project README.
-
-## [1.4.0] - 2026-04-24
-
-### Changed
-- **Architectural Refactor**: Migrated monolithic sections of `App.tsx` into modular layout components (`Sidebar`, `HUD`, `FlightDetailSidebar`) to improve maintainability and performance.
-- **Enhanced Animations**: Improved the flight detail panel transitions using `motion` and `AnimatePresence` for smoother user interaction.
-- **Code Optimization**: Streamlined the main application state and reduced redundant render cycles in the root component.
+## [1.5.0] - 2026-04-29
 
 ### Fixed
-- **Runtime Stability**: Resolved `ReferenceError` caused by missing icon imports (`Radio`, `Activity`) in the main application loop.
-- **Sidebar Persistence**: Fixed an issue where the detail sidebar would fail to unmount correctly during state transitions.
-- **Cleaned Orphaned Nodes**: Removed a large block of unused JSX from `App.tsx` that was causing potential hydration mismatches.
+- **Architectural Refactor**: Consolidated `App.tsx` initialization logic to prevent race conditions and redundant fetches during initial data load.
+- **Lazy Initialization**: Refactored `geminiService.ts` to use a singleton pattern for `GoogleGenAI` initialization, preventing silent crashes when `GEMINI_API_KEY` is missing.
+- **Infinite Loop Guard**: Fixed a memory-leak inducing infinite loop in the proximity alerts `useEffect` by implementing a deep-comparison check on new alert sets.
+- **Deployment Build System**: Normalized `package.json` and ensured production compatibility by leveraging Node.js native TypeScript type stripping for the server entry point.
+
+### Added
+- **Tactical UI Polish**: 
+  - Integrated a "Systems Operational" heartbeat indicator in the status bar.
+  - Added a scrolling telemetry ticker overlay to the HUD for enhanced immersion.
+  - Implemented a tactical "Compass Rose" element centered on the map view.
+- **Motion Orchestration**: Integrated `useAnimate` in the `Map` component for more granular control over flight path transitions, enabling smoother updates during real-time tracking.
+- **Enhanced Flight Details**: Added a "Tactical View" mini-overlay on the map when a flight is selected, providing quick telemetry at a glance.
+- **Visual Feedback**: Added a pulsing "LIVE" indicator and tactical status highlights to flight detail headers.
 
 ## [1.3.0] - 2026-04-24
 

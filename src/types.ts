@@ -55,18 +55,6 @@ export interface UserLocation {
   lng: number;
 }
 
-export interface LiveRadarFlight {
-  id: string;
-  callsign: string;
-  origin_country: string;
-  lat: number;
-  lng: number;
-  altitude: number;
-  velocity: number;
-  heading: number;
-  on_ground: boolean;
-}
-
 export interface UserPreferences {
   units: {
     altitude: 'ft' | 'm';
