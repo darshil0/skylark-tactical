@@ -20,7 +20,7 @@ const flightInputSchema = z.object({
 interface FlightModalProps {
   flight?: Flight;
   onClose: () => void;
-  onSave: (data: any) => Promise<void>;
+  onSave: (data: Partial<Flight>) => Promise<void>;
 }
 
 export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSave }) => {
@@ -86,18 +86,18 @@ export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSav
     setLoading(true); // Fix for Issue #12: Loading state
     try {
       // Map back to API structure
-      const payload = {
+      const payload: Partial<Flight> = {
         flightNumber: formData.flightNumber,
         airline: formData.airline,
         origin: { 
           code: formData.originCode, 
           city: formData.originCity,
-          lat: 0, lng: 0 // Mock coords
+          lat: 40.7128, lng: -74.0060 // Default to NYC instead of 0,0
         },
         destination: { 
           code: formData.destinationCode, 
           city: formData.destinationCity,
-          lat: 0, lng: 0 // Mock coords
+          lat: 51.5074, lng: -0.1278 // Default to London instead of 0,0
         },
         departureTime: new Date(formData.departureTime).toISOString(),
         arrivalTime: new Date(formData.arrivalTime).toISOString(),
@@ -206,7 +206,7 @@ export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSav
               <label className="text-[10px] font-mono text-gray-500 uppercase">Status</label>
               <select 
                 value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value as any})}
+                onChange={e => setFormData({...formData, status: e.target.value as Flight['status']})}
                 className="w-full bg-black/50 border border-gray-800 rounded px-3 py-2 text-sm text-white appearance-none"
               >
                 <option value="scheduled">SCHEDULED</option>

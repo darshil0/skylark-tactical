@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { clsx as cn } from 'clsx';
 import { FlightSearch } from '../FlightSearch';
 import { FlightRow } from '../FlightRow';
-import { Flight } from '../../types';
+import { Flight, LiveRadarFlight } from '../../types';
 
 interface SidebarProps {
   isMobileListOpen: boolean;
@@ -20,7 +20,7 @@ interface SidebarProps {
   setShowModal: (show: boolean) => void;
   setEditingFlight: (flight: Flight | undefined) => void;
   flights: Flight[];
-  liveRadarFlights: any[];
+  liveRadarFlights: LiveRadarFlight[];
   isSearching: boolean;
   handleSearch: (query: string) => void;
   fetchFlights: () => void;

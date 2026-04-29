@@ -10,7 +10,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { Sidebar } from './components/layout/Sidebar';
 import { FlightDetailSidebar } from './components/layout/FlightDetailSidebar';
 import { HUD } from './components/layout/HUD';
-import { Flight, UserLocation, UserPreferences } from './types';
+import { Flight, UserLocation, UserPreferences, LiveRadarFlight } from './types';
 import { getInitialFlights, searchFlights, getFlightTelemetry } from './services/geminiService';
 import { Terminal, Radio, Activity, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
@@ -46,7 +46,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [editingFlight, setEditingFlight] = useState<Flight | undefined>();
   const [liveRadarActive, setLiveRadarActive] = useState(false);
-  const [liveRadarFlights, setLiveRadarFlights] = useState<any[]>([]);
+  const [liveRadarFlights, setLiveRadarFlights] = useState<LiveRadarFlight[]>([]);
   const [userLocation, setUserLocation] = useState<UserLocation | undefined>();
   const [locationError, setLocationError] = useState<string | undefined>();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
@@ -88,7 +88,14 @@ export default function App() {
   const playAlertSound = useCallback(() => {
     if (!preferences.notifications.audibleAlerts) return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+      if (!AudioContextClass) return;
+      
+      const ctx = new AudioContextClass();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       
@@ -104,6 +111,9 @@ export default function App() {
       
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
+      
+      // Close context after playback to save resources
+      setTimeout(() => ctx.close(), 500);
     } catch (e) {
       console.warn("Audio Context blocked or unsupported");
     }
@@ -120,8 +130,15 @@ export default function App() {
       allFlights.push({
         id: f.id,
         flightNumber: f.callsign || f.id,
-        currentPosition: { lat: f.lat, lng: f.lng }
-      } as any);
+        airline: f.origin_country,
+        origin: { code: '---', city: 'LIVE', lat: f.lat, lng: f.lng },
+        destination: { code: '---', city: 'LIVE', lat: f.lat, lng: f.lng },
+        departureTime: new Date().toISOString(),
+        arrivalTime: new Date().toISOString(),
+        status: f.on_ground ? 'landed' : 'on-time',
+        progress: 100,
+        currentPosition: { lat: f.lat, lng: f.lng, altitude: f.altitude, speed: f.velocity, heading: f.heading }
+      });
     });
 
     const newAlerts = new Set<string>();
@@ -189,7 +206,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timeout;
     if (liveRadarActive) {
       fetchLiveRadar();
       interval = setInterval(fetchLiveRadar, 15000); // 15s polling
@@ -332,7 +349,7 @@ export default function App() {
     setIsSearching(false);
   };
 
-  const handleSaveFlight = async (payload: any) => {
+  const handleSaveFlight = async (payload: Partial<Flight>) => {
     const url = editingFlight ? `/api/flights/${editingFlight.id}` : '/api/flights';
     const method = editingFlight ? 'PATCH' : 'POST';
     

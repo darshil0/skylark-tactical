@@ -9,13 +9,13 @@ import { Share2, X, Activity, Wind, Navigation, Info, Radio, History } from 'luc
 import { format } from 'date-fns';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { clsx as cn } from 'clsx';
-import { Flight, UserPreferences } from '../../types';
+import { Flight, UserPreferences, LiveRadarFlight } from '../../types';
 
 interface FlightDetailSidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   selectedFlight?: Flight;
-  selectedLiveFlight?: any;
+  selectedLiveFlight?: LiveRadarFlight;
   handleShareFlight: () => void;
   preferences: UserPreferences;
 }

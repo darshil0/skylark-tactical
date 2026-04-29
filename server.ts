@@ -36,10 +36,25 @@ const flightSchema = z.object({
     speed: z.number(),
     heading: z.number(),
   }).optional(),
+  atcLog: z.array(z.string()).optional(),
+  aircraftType: z.string().optional(),
+  gate: z.string().optional(),
+  telemetry: z.object({
+    predictedFuelBurn: z.string().optional(),
+    estimatedTimeToDestination: z.string().optional(),
+    weatherAdvisories: z.array(z.string()).optional(),
+  }).optional(),
+  history: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    timestamp: z.string(),
+  })).optional(),
 });
 
+type Flight = z.infer<typeof flightSchema>;
+
 // Mock Database
-let flights = [
+let flights: Flight[] = [
   {
     id: "1",
     flightNumber: "BA123",
@@ -62,7 +77,14 @@ async function startServer() {
   
   // Fix for Issue #9: CORS configuration
   app.use(cors({
-    origin: ["http://0.0.0.0:3000", "http://localhost:3000", process.env.APP_URL].filter(Boolean) as string[],
+    origin: (origin, callback) => {
+      const allowedOrigins = ["http://localhost:3000", "http://0.0.0.0:3000", process.env.APP_URL].filter(Boolean);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true
   }));
 
@@ -74,7 +96,7 @@ async function startServer() {
   app.post("/api/flights", (req, res) => {
     try {
       const data = flightSchema.parse({ ...req.body, id: Math.random().toString(36).substr(2, 9) });
-      (flights as any).push(data);
+      flights.push(data);
       res.status(201).json(data);
     } catch (error) {
       if (error instanceof z.ZodError) {

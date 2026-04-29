@@ -55,7 +55,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [worldData, setWorldData] = useState<any>(null);
+  const [worldData, setWorldData] = useState<GeoJSON.FeatureCollection | null>(null);
   const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
   const [weatherData, setWeatherData] = useState<WeatherCell[]>([]);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
@@ -102,7 +102,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
   // Load static map data once
   useEffect(() => {
     d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then((data: any) => {
-      setWorldData(topojson.feature(data, data.objects.countries));
+      setWorldData(topojson.feature(data, data.objects.countries) as any);
     });
   }, []);
 
@@ -508,11 +508,11 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
                      <div className="space-y-3">
                         <div>
                           <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Velocity</span>
-                          <span className="text-sm font-bold text-white tabular-nums">{selectedFlight?.speed ?? 0} <span className="text-[9px] font-normal text-gray-400">KT</span></span>
+                          <span className="text-sm font-bold text-white tabular-nums">{selectedFlight?.currentPosition?.speed ?? 0} <span className="text-[9px] font-normal text-gray-400">KT</span></span>
                         </div>
                         <div>
                           <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Altitude</span>
-                          <span className="text-sm font-bold text-white tabular-nums">{(selectedFlight?.altitude ?? 0).toLocaleString()} <span className="text-[9px] font-normal text-gray-400">FT</span></span>
+                          <span className="text-sm font-bold text-white tabular-nums">{(selectedFlight?.currentPosition?.altitude ?? 0).toLocaleString()} <span className="text-[9px] font-normal text-gray-400">FT</span></span>
                         </div>
                      </div>
                      <div className="space-y-3">

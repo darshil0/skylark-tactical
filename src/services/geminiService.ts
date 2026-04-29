@@ -86,7 +86,11 @@ export async function searchFlights(query: string): Promise<Flight[]> {
   });
 
     try {
-      return JSON.parse(response.text || "[]");
+      const text = response.text;
+      if (!text) return [];
+      // Handle potential markdown code blocks in response
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      return JSON.parse(cleanText);
     } catch (e) {
       console.error("Failed to parse Gemini response", e);
       return [];
@@ -137,7 +141,10 @@ export async function getFlightTelemetry(flight: Flight): Promise<Flight['teleme
   });
 
     try {
-      return JSON.parse(response.text || "{}");
+      const text = response.text;
+      if (!text) return undefined;
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      return JSON.parse(cleanText);
     } catch (e) {
       console.error("Failed to parse telemetry response", e);
       return undefined;
