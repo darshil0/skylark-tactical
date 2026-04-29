@@ -117,7 +117,7 @@ export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSav
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg bg-[#0B0F19] border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
         <header className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
-          <h3 className="text-white font-bold uppercase tracking-widest text-xs">
+          <h3 className="text-white font-serif font-black italic uppercase tracking-widest text-sm">
             {flight ? 'Edit Flight Object' : 'Register New Flight'}
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">

@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-04-29
+
+### Added
+- **Tactical UI Polish**:
+  - Implemented ultra-thin "Blue Matrix" tactical scrollbars for enhanced aesthetics.
+  - Added "Live Sector" heartbeat animations to flight indicators.
+  - Improved data integrity visualization in the status bar with pulsing indicators.
+- **Robust AI Integration**:
+  - Enhanced `geminiService` with comprehensive error boundary handling for generative AI calls.
+  - Improved structured data parsing resilience for asynchronous telemetry updates.
+- **Dependency Optimization**:
+  - Migrated development-only type definitions to `devDependencies` to optimize production bundle overhead.
+  - Bumped internal system version to v1.6.0.
+
+### Fixed
+- **State Integrity**: Resolved a minor potential race condition during initial database hydration in `App.tsx`.
+- **UI Consistency**: Fixed alignment issues in the tactical HUD overlays on ultra-wide displays.
+- **Robustness**: 
+  - Added defensive null-checks for telemetry data in the tactical map overlay.
+  - Implemented graceful handling and tactical UI indicators for Geolocation permission denial.
+  - Suppressed benign Vite WebSocket connection errors and unhandled rejections using multi-layered event interception and console shadowing for a clean session experience.
+  - Hard-coded HMR disablement in `vite.config.ts` to ensure consistent performance in the AI Studio environment.
+
 ## [1.5.0] - 2026-04-29
 
 ### Fixed

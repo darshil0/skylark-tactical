@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Plane className="text-white w-7 h-7 -rotate-45" />
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-[calc(0.05em*-1)] text-white uppercase italic leading-none mb-1">SkyTrack</h1>
+              <h1 className="text-2xl font-serif font-black tracking-[calc(0.05em*-1)] text-white uppercase italic leading-none mb-1">SkyTrack</h1>
               <div className="flex items-center gap-2">
                 <span className={cn("w-1.5 h-1.5 rounded-full", liveRadarActive ? "bg-blue-400 animate-[pulse_1.5s_infinite]" : "bg-emerald-500 animate-pulse")} />
                 <span className={cn("text-[10px] font-mono uppercase tracking-[0.2em] font-bold", liveRadarActive ? "text-blue-400" : "text-emerald-500/80")}>

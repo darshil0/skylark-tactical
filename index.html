@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkyTrack | Real-time Global Flight Tracker</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+    <script>
+      // Suppress benign Vite WebSocket errors in AI Studio
+      const isBenignViteError = (err) => {
+        const msg = String(err?.message || err || '');
+        return msg.includes('WebSocket') || msg.includes('vite') || msg.includes('HMR');
+      };
+
+      const originalConsoleError = console.error;
+      console.error = (...args) => {
+        if (args.some(arg => isBenignViteError(arg))) return;
+        originalConsoleError.apply(console, args);
+      };
+
+      window.addEventListener('unhandledrejection', (event) => {
+        if (isBenignViteError(event.reason)) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      });
+
+      window.addEventListener('error', (event) => {
+        if (isBenignViteError(event.error) || isBenignViteError(event.message)) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      }, true);
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -16,8 +16,9 @@ function getAiClient(): GoogleGenAI {
 
 export async function searchFlights(query: string): Promise<Flight[]> {
   const client = getAiClient();
-  const response = await client.models.generateContent({
-    model: "gemini-3-flash-preview",
+  try {
+    const response = await client.models.generateContent({
+      model: "gemini-3-flash-preview",
     contents: `You are a real-time flight data and ATC surveillance engine. Use Google Search to find current, accurate flight information and relevant sector ATC communications for: "${query}".
     
     Current global time: ${new Date().toISOString()}
@@ -84,10 +85,14 @@ export async function searchFlights(query: string): Promise<Flight[]> {
     }
   });
 
-  try {
-    return JSON.parse(response.text || "[]");
-  } catch (e) {
-    console.error("Failed to parse Gemini response", e);
+    try {
+      return JSON.parse(response.text || "[]");
+    } catch (e) {
+      console.error("Failed to parse Gemini response", e);
+      return [];
+    }
+  } catch (err) {
+    console.error("AI Search generateContent failed:", err);
     return [];
   }
 }
@@ -98,8 +103,9 @@ export async function getInitialFlights(): Promise<Flight[]> {
 
 export async function getFlightTelemetry(flight: Flight): Promise<Flight['telemetry']> {
   const client = getAiClient();
-  const response = await client.models.generateContent({
-    model: "gemini-3-flash-preview",
+  try {
+    const response = await client.models.generateContent({
+      model: "gemini-3-flash-preview",
     contents: `Analyze the following flight and provide tactical telemetry predictions and safety advisories.
     
     Flight: ${flight.flightNumber} (${flight.airline})
@@ -130,10 +136,14 @@ export async function getFlightTelemetry(flight: Flight): Promise<Flight['teleme
     }
   });
 
-  try {
-    return JSON.parse(response.text || "{}");
-  } catch (e) {
-    console.error("Failed to parse telemetry response", e);
+    try {
+      return JSON.parse(response.text || "{}");
+    } catch (e) {
+      console.error("Failed to parse telemetry response", e);
+      return undefined;
+    }
+  } catch (err) {
+    console.error("AI Telemetry generateContent failed:", err);
     return undefined;
   }
 }

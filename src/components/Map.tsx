@@ -180,16 +180,44 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
         <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`}>
           {/* Compass Rose (Tactical) */}
           <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2}) scale(${1/transform.k})`}>
+            {/* Base Circles */}
             <circle r="40" fill="none" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="1,2" opacity="0.1" />
             <circle r="60" fill="none" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="2,4" opacity="0.05" />
-            {d3.range(0, 360, 45).map(deg => (
-              <line
-                key={deg}
-                x1="0" y1="-65" x2="0" y2="-70"
-                stroke="#3B82F6" strokeWidth="1" opacity="0.2"
-                transform={`rotate(${deg})`}
-              />
+            <circle r="100" fill="none" stroke="#3B82F6" strokeWidth="0.2" strokeDasharray="1,5" opacity="0.03" />
+            
+            {/* Cardinal Markers */}
+            {['N', 'E', 'S', 'W'].map((dir, i) => (
+              <text
+                key={dir}
+                y="-75"
+                fill="#3B82F6"
+                fontSize="8"
+                fontWeight="900"
+                fontFamily="monospace"
+                textAnchor="middle"
+                opacity="0.3"
+                transform={`rotate(${i * 90})`}
+              >
+                {dir}
+              </text>
             ))}
+
+            {/* Tick Marks */}
+            {d3.range(0, 360, 15).map(deg => {
+              const isMajor = deg % 45 === 0;
+              return (
+                <line
+                  key={deg}
+                  x1="0" y1={isMajor ? -65 : -67} x2="0" y2="-70"
+                  stroke="#3B82F6" strokeWidth={isMajor ? 1 : 0.5} opacity={isMajor ? 0.3 : 0.1}
+                  transform={`rotate(${deg})`}
+                />
+              );
+            })}
+
+            {/* Crosshair */}
+            <line x1="-15" y1="0" x2="15" y2="0" stroke="#3B82F6" strokeWidth="0.5" opacity="0.1" />
+            <line x1="0" y1="-15" x2="0" y2="15" stroke="#3B82F6" strokeWidth="0.5" opacity="0.1" />
           </g>
 
           {/* Static Map Layer */}
@@ -446,40 +474,94 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
       <AnimatePresence>
         {selectedFlightId && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-xl border border-blue-500/30 p-4 rounded-lg shadow-[0_0_50px_rgba(37,99,235,0.2)] z-50 w-64 pointer-events-none"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="absolute bottom-6 right-6 bg-black/80 backdrop-blur-2xl border border-blue-500/30 p-5 rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 w-72 pointer-events-none overflow-hidden"
           >
-            <div className="flex justify-between items-start mb-2">
+            {/* Decrypting lines animation */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent animate-scan z-10" />
+            
+            <div className="flex justify-between items-start mb-4 relative z-20">
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tighter italic">
+                <h3 className="text-2xl font-serif font-black text-white tracking-tighter italic leading-none">
                   {flights.find(f => f.id === selectedFlightId)?.flightNumber}
                 </h3>
-                <p className="text-[10px] font-mono text-blue-400">TRACKING_ACTIVE</p>
+                <div className="flex items-center gap-1.5 mt-1">
+                   <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                   <p className="text-[8px] font-mono text-blue-400 uppercase tracking-[0.2em]">Live_Vector_Acquired</p>
+                </div>
               </div>
-              <div className="bg-blue-500/20 px-2 py-1 rounded">
-                <span className="text-[10px] font-mono text-blue-400">FLIGHT_LVL: {flights.find(f => f.id === selectedFlightId)?.altitude}</span>
+              <div className="flex flex-col items-end">
+                <div className="bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 mb-1">
+                  <span className="text-[9px] font-mono text-blue-300 font-bold">SQL_DB: PERSISTED</span>
+                </div>
+                <span className="text-[8px] font-mono text-gray-500">ID: {selectedFlightId.slice(0, 8).toUpperCase()}</span>
               </div>
             </div>
             
-            <div className="space-y-2 mt-4">
-               <div className="flex justify-between text-[10px] font-mono">
-                  <span className="text-gray-500">SPD</span>
-                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.speed} KT</span>
-               </div>
-               <div className="flex justify-between text-[10px] font-mono">
-                  <span className="text-gray-500">HDG</span>
-                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.currentPosition?.heading}°</span>
-               </div>
-               <div className="w-full h-[1px] bg-gray-800" />
-               <div className="flex justify-between text-[10px] font-mono">
-                  <span className="text-gray-500">ORIG</span>
-                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.origin.code}</span>
-               </div>
-               <div className="flex justify-between text-[10px] font-mono">
-                  <span className="text-gray-500">DEST</span>
-                  <span className="text-white">{flights.find(f => f.id === selectedFlightId)?.destination.code}</span>
+            <div className="grid grid-cols-2 gap-4 mt-6 relative z-20">
+               {(() => {
+                 const selectedFlight = flights.find(f => f.id === selectedFlightId);
+                 return (
+                   <>
+                     <div className="space-y-3">
+                        <div>
+                          <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Velocity</span>
+                          <span className="text-sm font-bold text-white tabular-nums">{selectedFlight?.speed ?? 0} <span className="text-[9px] font-normal text-gray-400">KT</span></span>
+                        </div>
+                        <div>
+                          <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Altitude</span>
+                          <span className="text-sm font-bold text-white tabular-nums">{(selectedFlight?.altitude ?? 0).toLocaleString()} <span className="text-[9px] font-normal text-gray-400">FT</span></span>
+                        </div>
+                     </div>
+                     <div className="space-y-3">
+                        <div>
+                          <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Heading</span>
+                          <span className="text-sm font-bold text-white tabular-nums">{selectedFlight?.currentPosition?.heading ?? 0}° <span className="text-[9px] font-normal text-gray-400">TRUE</span></span>
+                        </div>
+                        <div>
+                          <span className="text-[8px] font-mono text-gray-500 uppercase block tracking-widest">Progress</span>
+                          <div className="flex items-center gap-2">
+                             <span className="text-sm font-bold text-blue-400 tabular-nums">{selectedFlight?.progress || 0}%</span>
+                             <div className="flex-1 h-1 bg-gray-900 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-blue-500" 
+                                  style={{ width: `${selectedFlight?.progress || 0}%` }} 
+                                />
+                             </div>
+                          </div>
+                        </div>
+                     </div>
+                   </>
+                 );
+               })()}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-gray-800/50 flex justify-between items-center relative z-20">
+               {(() => {
+                 const selectedFlight = flights.find(f => f.id === selectedFlightId);
+                 return (
+                   <>
+                     <div className="flex items-center gap-3">
+                        <div className="text-center">
+                           <span className="text-[7px] font-mono text-gray-600 block uppercase">Orig</span>
+                           <span className="text-xs font-black text-gray-300">{selectedFlight?.origin.code}</span>
+                        </div>
+                        <div className="w-8 h-[1px] bg-gray-800 relative">
+                           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-blue-500/30" />
+                        </div>
+                        <div className="text-center">
+                           <span className="text-[7px] font-mono text-gray-600 block uppercase">Dest</span>
+                           <span className="text-xs font-black text-gray-300">{selectedFlight?.destination.code}</span>
+                        </div>
+                     </div>
+                   </>
+                 );
+               })()}
+               <div className="text-right">
+                  <span className="text-[7px] font-mono text-emerald-500/50 block uppercase">Encryption</span>
+                  <span className="text-[9px] font-mono text-emerald-500 font-bold">AES-256-GCM</span>
                </div>
             </div>
           </motion.div>

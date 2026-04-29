@@ -12,7 +12,7 @@ import { FlightDetailSidebar } from './components/layout/FlightDetailSidebar';
 import { HUD } from './components/layout/HUD';
 import { Flight, UserLocation, UserPreferences } from './types';
 import { getInitialFlights, searchFlights, getFlightTelemetry } from './services/geminiService';
-import { Terminal, Radio, Activity } from 'lucide-react';
+import { Terminal, Radio, Activity, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { clsx as cn } from 'clsx';
 
@@ -48,6 +48,7 @@ export default function App() {
   const [liveRadarActive, setLiveRadarActive] = useState(false);
   const [liveRadarFlights, setLiveRadarFlights] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<UserLocation | undefined>();
+  const [locationError, setLocationError] = useState<string | undefined>();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     const saved = localStorage.getItem('skytrack_preferences');
     if (saved) {
@@ -206,11 +207,17 @@ export default function App() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setLocationError(undefined);
         },
         (error) => {
-          console.error("Geolocation error:", error);
-        }
+          const msg = error.code === 1 ? 'PERM_DENIED' : `ERR_CODE_${error.code}`;
+          if (error.code !== 1) console.error(`Geolocation error (${error.code}): ${error.message}`);
+          setLocationError(msg);
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
       );
+    } else {
+      setLocationError("Geolocation not supported by browser");
     }
   }, []);
 
@@ -458,6 +465,26 @@ export default function App() {
                   <span className="text-emerald-500 font-bold text-[9px]">SYSTEMS_OPERATIONAL</span>
                </div>
                <span className="hidden lg:inline text-blue-500/50">SYSTEM_UPTIME: {Math.floor(performance.now()/1000)}s</span>
+               {locationError && (
+                 <div className="flex items-center gap-2 text-red-500/80">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span className="text-[9px] font-mono uppercase tracking-widest cursor-default">
+                      {locationError === 'PERM_DENIED' ? 'LOC_PERM_DENIED' : 'LOC_UNAVAILABLE'}
+                    </span>
+                    <button 
+                      onClick={() => getUserLocation()}
+                      className="ml-1 px-1.5 py-0.5 bg-red-500/10 border border-red-500/30 rounded hover:bg-red-500/20 active:scale-95 transition-all text-[8px] font-bold text-red-400"
+                    >
+                      RETRY_LOCK
+                    </button>
+                 </div>
+               )}
+               {userLocation && (
+                 <div className="hidden xl:flex items-center gap-2 text-emerald-500/50">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>POS_LOCK: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}</span>
+                 </div>
+               )}
               <span className="text-white">UTC {new Date().toISOString().split('T')[1].split('.')[0]}</span>
            </div>
         </div>

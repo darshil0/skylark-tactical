@@ -84,7 +84,7 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
         <header className="p-6 border-b border-gray-800 flex justify-between items-start relative z-20">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-black text-white italic tracking-tighter leading-none">
+              <h2 className="text-2xl font-serif font-black text-white italic tracking-tighter leading-none">
                 {selectedLiveFlight ? (selectedLiveFlight.callsign || `ICAO:${selectedLiveFlight.id}`) : (selectedFlight?.flightNumber || 'N/A')}
               </h2>
               {isLive && (
