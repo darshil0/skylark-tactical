@@ -6,11 +6,13 @@ SkyTrack is a high-performance, real-time flight tracking application built with
 
 -   **Tactical Map Interface**: A high-contrast, black-ops style map built with D3.js, supporting natural earth projections, smooth zooming, **animated flight trajectories**, and interactive map layers.
 -   **AI Weather Radar Layer**: Live global weather system tracking powered by Gemini with Search Grounding, identifying storms and precipitation centers in real-time.
+-   **Type-Safe Architecture**: Fully refactored codebase using strict TypeScript interfaces and Zod validation for all telemetry and radar data, ensuring high reliability during real-time tracking sessions.
+-   **High-Fidelity HUD**: Enhanced tactical display with accurate velocity, altitude, and heading indicators synchronized with current positional vectors.
 -   **Tactical Airspace Sectors**: Visualization of major Flight Information Regions (FIRs) and tactical airspace boundaries.
 -   **Advanced Telemetry History**: High-fidelity data visualization for flight paths, featuring scaled Lat/Lng progression charts, interactive tooltips, and predictive fuel burn calculations.
 -   **Intelligent Proximity Alerts**: Real-time detection of aircraft within a user-defined radius (up to 250NM), featuring pulsing visual highlights, callsign identification in the HUD, and optional audible synthesizer tones.
 -   **Live Radar Ingestion**: Real-time flight data fetching from ADSB-Exchange and Google Search Grounding to provide current aircraft positions.
--   **AI-Powered Search**: Natural language search capabilities powered by Gemini 1.5 Flash to find specific flights or simulate data.
+-   **AI-Powered Search**: Natural language search capabilities powered by **Gemini 3 Flash** to find specific flights or simulate data.
 -   **ATC Communication Decryption**: Anonymized, simulated ATC transcripts based on current flight sectors for enhanced situational awareness.
 -   **Flight Management**: Full CRUD operations for managing a personal database of tracked flights.
 -   **Deep Linking & Sharing**: Easily share specific flight tracking data via generated URLs.
@@ -22,7 +24,7 @@ SkyTrack is a high-performance, real-time flight tracking application built with
 -   **Animations**: Motion (`motion/react`)
 -   **Backend**: Node.js, Express, Zod (Validation)
 -   **Data Visualization**: D3.js, Recharts
--   **AI Engine**: Google Generative AI (Gemini 1.5 Flash) with Search Grounding
+-   **AI Engine**: Google Generative AI (**Gemini 3 Flash**) with Search Grounding
 -   **Icons**: Lucide React
 -   **Styling**: Tactical UI System with custom scanline effects and grid overlays
 
