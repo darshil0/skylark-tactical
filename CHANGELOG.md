@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2026-04-29
+
+### Added
+- **Premium Tactical UI System**:
+  - Implemented `.glass-panel` and `.tactical-glow` utility classes for high-fidelity interface design.
+  - Added new soft-pulse and optimized scanline animations to `index.css`.
+- **UI Refinements**:
+  - Redesigned `FlightRow` airline indicators with smart initials generation.
+  - Integrated glassmorphism and tactical glows into `SettingsModal`, `FlightModal`, and Map overlays.
+
+### Fixed
+- **Layout Management**:
+  - Repositioned HUD proximity alerts and mobile manifest toggles to prevent overlap with the system ticker.
+  - Adjusted z-index hierarchy for tactical HUD brackets to ensure clear visibility of interactive sidebars.
+  - Optimized custom scrollbar thickness and color for a more subtle tactical feel.
+
 ## [1.6.1] - 2026-04-29
 
 ### Fixed
