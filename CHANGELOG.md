@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - **Robust AI Integration**:
   - Enhanced `geminiService` with comprehensive error boundary handling for generative AI calls.
   - Improved structured data parsing resilience for asynchronous telemetry updates.
+- **Advanced Telemetry Visualizations**:
+  - Implemented high-fidelity Recharts-powered tracking history with dual-axis coordinate mapping (Lat/Lng) and interactive hover tooltips.
+  - Developed "Status-Aware" data fallbacks providing clear tactical indicators when telemetry or history data is pending or unavailable.
 - **Dependency Optimization**:
   - Migrated development-only type definitions to `devDependencies` to optimize production bundle overhead.
   - Bumped internal system version to v1.6.0.
