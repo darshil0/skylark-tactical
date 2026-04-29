@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, X, Activity, Wind, Navigation, Info, Radio } from 'lucide-react';
+import { Share2, X, Activity, Wind, Navigation, Info, Radio, History } from 'lucide-react';
 import { format } from 'date-fns';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { clsx as cn } from 'clsx';
 import { Flight, UserPreferences } from '../../types';
 
@@ -221,8 +221,158 @@ export const FlightDetailSidebar: React.FC<FlightDetailSidebarProps> = ({
                 </div>
              </div>
             )}
-            
-            {/* ... Rest of the details content would go here if needed ... */}
+
+            {!isLive && selectedFlight && (
+              <div className="space-y-6">
+                {/* Calculated Telemetry Section */}
+                <div className="pt-4 border-t border-gray-800 space-y-4">
+                   <div className="flex items-center gap-2 text-gray-400">
+                      <Activity className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-[10px] font-mono uppercase tracking-widest">Calculated Telemetry</span>
+                   </div>
+                   {selectedFlight.telemetry ? (
+                     <div className="bg-blue-900/10 border border-blue-900/30 rounded p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                           <div>
+                              <p className="text-gray-500 text-[9px] uppercase">Est. Arrival</p>
+                              <p className="text-white font-mono">{selectedFlight.telemetry.estimatedTimeToDestination || 'TBD'}</p>
+                           </div>
+                           <div>
+                              <p className="text-gray-500 text-[9px] uppercase">Fuel Burn (EST)</p>
+                              <p className="text-blue-400 font-mono tracking-tight">{selectedFlight.telemetry.predictedFuelBurn || 'CALCULATING...'}</p>
+                           </div>
+                        </div>
+                        {selectedFlight.telemetry.weatherAdvisories && selectedFlight.telemetry.weatherAdvisories.length > 0 && (
+                          <div className="pt-2 border-t border-blue-900/20">
+                             <p className="text-gray-500 text-[8px] uppercase mb-1">Weather Advisories</p>
+                             <div className="space-y-1">
+                                {selectedFlight.telemetry.weatherAdvisories.map((adv, i) => (
+                                  <p key={i} className="text-[10px] text-amber-500/80">• {adv}</p>
+                                ))}
+                             </div>
+                          </div>
+                        )}
+                     </div>
+                   ) : (
+                     <div className="bg-gray-900/20 border border-gray-800 rounded p-6 text-center">
+                        <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest italic">{selectedFlight.status === 'scheduled' ? 'DATA_PENDING_TAKEOFF' : 'Telemetry data unavailable'}</p>
+                     </div>
+                   )}
+                </div>
+
+            {/* History Section */}
+            <div className="pt-4 border-t border-gray-800 space-y-4">
+               <div className="flex items-center gap-2 text-gray-400">
+                  <History className="w-3.5 h-3.5 text-blue-500" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest">Flight Tracking History</span>
+               </div>
+               {selectedFlight.history && selectedFlight.history.length > 0 ? (
+                 <div className="space-y-4">
+                    <div className="h-40 w-full bg-black/40 rounded border border-gray-800 p-2 relative overflow-hidden">
+                       <div className="absolute top-2 right-2 flex gap-3 z-10">
+                          <div className="flex items-center gap-1">
+                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                             <span className="text-[7px] text-gray-500 font-mono">LAT</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                             <span className="text-[7px] text-gray-500 font-mono">LNG</span>
+                          </div>
+                       </div>
+                       <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={selectedFlight.history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                             <defs>
+                                <linearGradient id="colorLat" x1="0" y1="0" x2="0" y2="1">
+                                   <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                                   <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                                </linearGradient>
+                                <linearGradient id="colorLng" x1="0" y1="0" x2="0" y2="1">
+                                   <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                                   <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                                </linearGradient>
+                             </defs>
+                             <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
+                             <XAxis 
+                                dataKey="timestamp" 
+                                hide 
+                             />
+                             <YAxis 
+                                yAxisId="lat"
+                                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                                hide
+                             />
+                             <YAxis 
+                                yAxisId="lng"
+                                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                                hide
+                             />
+                             <Tooltip 
+                                content={({ active, payload }) => {
+                                   if (active && payload && payload.length) {
+                                      const data = payload[0].payload;
+                                      return (
+                                         <div className="bg-[#0B0F19]/90 backdrop-blur-md border border-gray-800 p-2 rounded shadow-2xl font-mono text-[9px] min-w-[120px]">
+                                            <p className="text-gray-500 mb-1 border-b border-gray-800 pb-1">
+                                               T: {format(new Date(data.timestamp), 'HH:mm:ss')}
+                                            </p>
+                                            <div className="space-y-0.5">
+                                               <div className="flex justify-between gap-4">
+                                                  <span className="text-blue-400/80">LATITUDE:</span>
+                                                  <span className="text-white font-bold">{data.lat.toFixed(4)}°</span>
+                                               </div>
+                                               <div className="flex justify-between gap-4">
+                                                  <span className="text-emerald-400/80">LONGITUDE:</span>
+                                                  <span className="text-white font-bold">{data.lng.toFixed(4)}°</span>
+                                               </div>
+                                            </div>
+                                         </div>
+                                      );
+                                   }
+                                   return null;
+                                }}
+                             />
+                             <Area 
+                                yAxisId="lat"
+                                type="monotone" 
+                                dataKey="lat" 
+                                stroke="#3B82F6" 
+                                fillOpacity={1} 
+                                fill="url(#colorLat)" 
+                                strokeWidth={1.5}
+                                isAnimationActive={true}
+                             />
+                             <Area 
+                                yAxisId="lng"
+                                type="monotone" 
+                                dataKey="lng" 
+                                stroke="#10B981" 
+                                fillOpacity={1} 
+                                fill="url(#colorLng)" 
+                                strokeWidth={1.5}
+                                isAnimationActive={true}
+                             />
+                          </AreaChart>
+                       </ResponsiveContainer>
+                    </div>
+                    <div className="bg-black/40 border border-gray-800 rounded overflow-hidden">
+                       <div className="max-h-40 overflow-y-auto">
+                          {selectedFlight.history.map((h, i) => (
+                            <div key={i} className="p-2 border-b border-gray-800/50 flex justify-between items-center text-[10px] font-mono last:border-0 hover:bg-gray-800/30 transition-colors">
+                               <span className="text-gray-400">[{format(new Date(h.timestamp), 'HH:mm:ss')}]</span>
+                               <span className="text-blue-400">{h.lat.toFixed(4)}, {h.lng.toFixed(4)}</span>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+               ) : (
+                     <div className="bg-gray-900/20 border border-gray-800 rounded p-6 text-center">
+                        <p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest italic">Flight history not recorded</p>
+                     </div>
+                   )}
+                </div>
+              </div>
+            )}
         </div>
       </motion.div>
   );
