@@ -407,7 +407,7 @@ export default function App() {
         <button 
           onClick={() => setIsMobileListOpen(true)}
           className={cn(
-            "lg:hidden absolute top-4 left-4 z-20 p-3 bg-blue-600 text-white rounded-full shadow-2xl transition-all active:scale-90",
+            "lg:hidden absolute top-12 left-4 z-20 p-3 bg-blue-600 text-white rounded-full tactical-glow transition-all active:scale-90",
             isMobileListOpen && "opacity-0 pointer-events-none"
           )}
         >

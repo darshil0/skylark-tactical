@@ -26,7 +26,7 @@ export const HUD: React.FC<HUDProps> = ({
   return (
     <>
       {/* Tactical Corner Brackets */}
-      <div className="absolute inset-0 pointer-events-none z-30 opacity-20">
+      <div className="absolute inset-0 pointer-events-none z-10 opacity-20">
         <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-blue-500 rounded-tl-sm" />
         <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-blue-500 rounded-tr-sm" />
         <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-blue-500 rounded-bl-sm" />
@@ -63,10 +63,10 @@ export const HUD: React.FC<HUDProps> = ({
       <AnimatePresence>
       {activeAlerts.size > 0 && preferences.notifications.proximityAlerts && (
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-red-600/90 backdrop-blur-md px-6 py-2 rounded-full border border-red-400 shadow-[0_0_40px_rgba(220,38,38,0.4)] flex items-center gap-3"
+          exit={{ opacity: 0, y: -40 }}
+          className="absolute top-12 left-1/2 -translate-x-1/2 z-40 bg-red-600/90 backdrop-blur-md px-6 py-2 rounded-sm border border-red-400 shadow-[0_0_40px_rgba(220,38,38,0.4)] flex items-center gap-3"
         >
           <AlertTriangle className="w-5 h-5 text-white animate-pulse" />
           <div className="flex flex-col items-center">

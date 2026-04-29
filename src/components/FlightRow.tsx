@@ -32,17 +32,20 @@ export const FlightRow: React.FC<FlightRowProps> = ({ flight, isSelected, onSele
           className="absolute left-0 right-0 h-[2px] bg-blue-500/20 z-10 pointer-events-none"
         />
       )}
-      <div className="flex flex-col items-center justify-center bg-gray-900 rounded aspect-square w-10 mx-auto border border-gray-800 relative">
+      <div className={cn(
+        "flex flex-col items-center justify-center bg-gray-900 rounded aspect-square w-10 mx-auto border border-gray-800 relative transition-all",
+        isSelected && "border-blue-500/50 tactical-glow"
+      )}>
         {isLive && (
           <div className="absolute -top-1 -right-1 flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </div>
         )}
-        <span className="text-[10px] font-black text-gray-500 opacity-50 uppercase leading-none">
-          {flight.airline.slice(0, 2)}
+        <span className="text-[10px] font-black text-gray-500 opacity-50 uppercase leading-none text-center">
+          {flight.airline.split(' ').map(w => w[0]).join('').slice(0, 2)}
           <br/>
-          {flight.airline.slice(2, 4)}
+          {flight.airline.split(' ').map(w => w[0]).join('').slice(2, 4)}
         </span>
       </div>
 

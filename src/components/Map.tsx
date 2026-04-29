@@ -477,7 +477,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="absolute bottom-6 right-6 bg-black/80 backdrop-blur-2xl border border-blue-500/30 p-5 rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 w-72 pointer-events-none overflow-hidden"
+            className="absolute bottom-6 right-6 glass-panel p-5 rounded-sm tactical-glow z-50 w-72 overflow-hidden"
           >
             {/* Decrypting lines animation */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent animate-scan z-10" />

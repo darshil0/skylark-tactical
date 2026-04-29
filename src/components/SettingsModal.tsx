@@ -29,7 +29,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, p
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative w-full max-w-md bg-[#0B0F19] border border-gray-800 rounded-xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md glass-panel rounded-xl tactical-glow overflow-hidden"
       >
         <header className="p-4 border-b border-gray-800 flex justify-between items-center bg-[#0D121F]">
           <div className="flex items-center gap-2">
