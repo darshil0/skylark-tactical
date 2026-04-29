@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-04-29
+
+### Fixed
+- **Type Safety**:
+  - Implemented strict interface for Live Radar data (`LiveRadarFlight`) replacing `any` usage.
+  - Resolved TypeScript errors in `Map.tsx`, `App.tsx`, and `Sidebar.tsx` related to flight property access.
+  - Fixed property access bugs in HUD/Overlay: `speed` and `altitude` are now correctly accessed via `currentPosition`.
+- **System Stability**:
+  - Synchronized Zod schema in `server.ts` with frontend `Flight` interface, including all optional fields.
+  - Improved CORS configuration with more robust origin validation.
+  - Enhanced Gemini API response parsing to handle Markdown code blocks and empty results gracefully.
+- **UI/UX Refinement**:
+  - Fixed "Gulf of Guinea" bug where new flights defaulted to (0,0) coordinates; now defaults to sensible global hubs.
+  - Optimized AudioContext initialization to better handle browser autoplay restrictions and resource management.
+
 ## [1.6.0] - 2026-04-29
 
 ### Added
