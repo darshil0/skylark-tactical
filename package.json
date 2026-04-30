@@ -1,12 +1,12 @@
 {
   "name": "react-example",
   "private": true,
-  "version": "1.7.0",
+  "version": "1.7.1",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "tsx server/index.ts",
     "build": "vite build",
-    "start": "node server.ts",
+    "start": "node server/index.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

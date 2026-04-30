@@ -3,377 +3,46 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { Map } from './components/Map';
 import { FlightModal } from './components/FlightModal';
 import { SettingsModal } from './components/SettingsModal';
 import { Sidebar } from './components/layout/Sidebar';
 import { FlightDetailSidebar } from './components/layout/FlightDetailSidebar';
 import { HUD } from './components/layout/HUD';
-import { Flight, UserLocation, UserPreferences, LiveRadarFlight } from './types';
-import { getInitialFlights, searchFlights, getFlightTelemetry } from './services/geminiService';
 import { Terminal, Radio, Activity, AlertTriangle } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { clsx as cn } from 'clsx';
-
-const DEFAULT_PREFERENCES: UserPreferences = {
-  units: {
-    altitude: 'ft',
-    speed: 'kts',
-    distance: 'nm',
-  },
-  mapStyle: 'dark',
-  notifications: {
-    statusChanges: true,
-    proximityAlerts: false,
-    proximityRadius: 50,
-    audibleAlerts: false,
-  },
-  mapLayers: {
-    weather: false,
-    airspace: false,
-  },
-  defaultView: 'global',
-};
+import { useSkyTrack } from './hooks/useSkyTrack';
 
 export default function App() {
-  const [flights, setFlights] = useState<Flight[]>([]);
-  const [selectedFlightId, setSelectedFlightId] = useState<string | undefined>();
-  const [isSearching, setIsSearching] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobileListOpen, setIsMobileListOpen] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [editingFlight, setEditingFlight] = useState<Flight | undefined>();
-  const [liveRadarActive, setLiveRadarActive] = useState(false);
-  const [liveRadarFlights, setLiveRadarFlights] = useState<LiveRadarFlight[]>([]);
-  const [userLocation, setUserLocation] = useState<UserLocation | undefined>();
-  const [locationError, setLocationError] = useState<string | undefined>();
-  const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    const saved = localStorage.getItem('skytrack_preferences');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_PREFERENCES,
-          ...parsed,
-          units: { ...DEFAULT_PREFERENCES.units, ...parsed.units },
-          notifications: { ...DEFAULT_PREFERENCES.notifications, ...parsed.notifications },
-          mapLayers: { ...DEFAULT_PREFERENCES.mapLayers, ...(parsed.mapLayers || {}) },
-        };
-      } catch (e) {
-        console.error("Failed to parse preferences", e);
-        return DEFAULT_PREFERENCES;
-      }
-    }
-    return DEFAULT_PREFERENCES;
-  });
-
-  const [activeAlerts, setActiveAlerts] = useState<Set<string>>(new Set());
-  const [isTelemetryLoading, setIsTelemetryLoading] = useState(false);
-
-  // Haversine distance in Nautical Miles
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 3440.065; // Earth radius in NM
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  const playAlertSound = useCallback(() => {
-    if (!preferences.notifications.audibleAlerts) return;
-    try {
-      const AudioContextClass = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
-      if (!AudioContextClass) return;
-      
-      const ctx = new AudioContextClass();
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
-      
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-      
-      // Close context after playback to save resources
-      setTimeout(() => ctx.close(), 500);
-    } catch (e) {
-      console.warn("Audio Context blocked or unsupported");
-    }
-  }, [preferences.notifications.audibleAlerts]);
-
-  useEffect(() => {
-    if (!preferences.notifications.proximityAlerts || !userLocation) {
-      if (activeAlerts.size > 0) setActiveAlerts(new Set());
-      return;
-    }
-    
-    const allFlights = [...flights];
-    liveRadarFlights.forEach(f => {
-      allFlights.push({
-        id: f.id,
-        flightNumber: f.callsign || f.id,
-        airline: f.origin_country,
-        origin: { code: '---', city: 'LIVE', lat: f.lat, lng: f.lng },
-        destination: { code: '---', city: 'LIVE', lat: f.lat, lng: f.lng },
-        departureTime: new Date().toISOString(),
-        arrivalTime: new Date().toISOString(),
-        status: f.on_ground ? 'landed' : 'on-time',
-        progress: 100,
-        currentPosition: { lat: f.lat, lng: f.lng, altitude: f.altitude, speed: f.velocity, heading: f.heading }
-      });
-    });
-
-    const newAlerts = new Set<string>();
-    let hasBrandNewAlert = false;
-
-    allFlights.forEach(flight => {
-      if (!flight.currentPosition) return;
-      const dist = calculateDistance(
-        userLocation.lat, 
-        userLocation.lng, 
-        flight.currentPosition.lat, 
-        flight.currentPosition.lng
-      );
-
-      if (dist <= preferences.notifications.proximityRadius) {
-        newAlerts.add(flight.id);
-        if (!activeAlerts.has(flight.id)) {
-          hasBrandNewAlert = true;
-        }
-      }
-    });
-
-    if (hasBrandNewAlert) {
-      playAlertSound();
-    }
-
-    // Check if alerts actually changed before updating state to avoid infinite loops
-    const alertsChanged = newAlerts.size !== activeAlerts.size || Array.from(newAlerts).some(id => !activeAlerts.has(id));
-    if (alertsChanged) {
-      setActiveAlerts(newAlerts);
-    }
-  }, [flights, liveRadarFlights, userLocation, preferences.notifications.proximityAlerts, preferences.notifications.proximityRadius, playAlertSound, activeAlerts]); // activeAlerts stays here but logic above prevents loop
-
-  const handleSavePreferences = (newPrefs: UserPreferences) => {
-    setPreferences(newPrefs);
-    localStorage.setItem('skytrack_preferences', JSON.stringify(newPrefs));
-  };
+  const {
+    flights,
+    selectedFlightId,
+    isSearching,
+    isMobileListOpen, setIsMobileListOpen,
+    showModal, setShowModal,
+    showSettings, setShowSettings,
+    editingFlight, setEditingFlight,
+    liveRadarActive, setLiveRadarActive,
+    liveRadarFlights,
+    userLocation,
+    locationError,
+    preferences,
+    activeAlerts,
+    isSidebarOpen, setIsSidebarOpen,
+    handleSavePreferences,
+    handleSelectFlight,
+    handleDeleteFlight,
+    handleSaveFlight,
+    handleSearch,
+    fetchFlights,
+    fetchLiveRadar,
+    getUserLocation
+  } = useSkyTrack();
 
   const selectedFlight = flights.find(f => f.id === selectedFlightId);
   const selectedLiveFlight = liveRadarFlights.find(f => f.id === selectedFlightId);
-
-  const fetchFlights = async () => {
-    try {
-      const res = await fetch('/api/flights');
-      if (res.ok) {
-        const data = await res.json();
-        setFlights(data);
-        if (data.length > 0 && !selectedFlightId && !liveRadarActive) setSelectedFlightId(data[0].id);
-      }
-    } catch (err) {
-      console.error("Failed to fetch from API", err);
-    }
-  };
-
-  const fetchLiveRadar = async () => {
-    try {
-      const res = await fetch('/api/external/live-flights');
-      if (res.ok) {
-        const data = await res.json();
-        setLiveRadarFlights(data);
-      }
-    } catch (err) {
-      console.error("Live Radar fetch failed", err);
-    }
-  };
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (liveRadarActive) {
-      fetchLiveRadar();
-      interval = setInterval(fetchLiveRadar, 15000); // 15s polling
-    } else {
-      setLiveRadarFlights([]);
-    }
-    return () => clearInterval(interval);
-  }, [liveRadarActive]);
-
-  const getUserLocation = useCallback(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationError(undefined);
-        },
-        (error) => {
-          const msg = error.code === 1 ? 'PERM_DENIED' : `ERR_CODE_${error.code}`;
-          if (error.code !== 1) console.error(`Geolocation error (${error.code}): ${error.message}`);
-          setLocationError(msg);
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-      );
-    } else {
-      setLocationError("Geolocation not supported by browser");
-    }
-  }, []);
-
-  useEffect(() => {
-    getUserLocation();
-    
-    const initializeData = async () => {
-      try {
-        await fetchFlights();
-        
-        // If no flights, populate with initial AI data
-        // Check local flights state after fetch
-        if (flights.length === 0) {
-          const res = await fetch('/api/flights');
-          const data = await res.json();
-          
-          if (data.length === 0) {
-            setIsSearching(true);
-            const aiData = await getInitialFlights();
-            for (const f of aiData) {
-              await fetch('/api/flights', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(f)
-              });
-            }
-            await fetchFlights();
-            setIsSearching(false);
-          }
-        }
-      } catch (err) {
-        console.error("Initialization failed", err);
-      }
-    };
-    
-    initializeData();
-  }, [getUserLocation]);
-
-  useEffect(() => {
-    // Handle deep linking for shared flights
-    const params = new URLSearchParams(window.location.search);
-    const sharedFlightId = params.get('flightId');
-    if (sharedFlightId) {
-      setSelectedFlightId(sharedFlightId);
-      setIsSidebarOpen(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Handle telemetry fetching for selected flight
-    const flight = flights.find(f => f.id === selectedFlightId);
-    if (flight && !flight.telemetry && !isTelemetryLoading) {
-      const fetchTelemetry = async () => {
-        setIsTelemetryLoading(true);
-        const telemetry = await getFlightTelemetry(flight);
-        if (telemetry) {
-          setFlights(prev => prev.map(f => f.id === flight.id ? { ...f, telemetry } : f));
-        }
-        setIsTelemetryLoading(false);
-      };
-      fetchTelemetry();
-    }
-  }, [selectedFlightId, flights, isTelemetryLoading]);
-
-  const handleShareFlight = async () => {
-    const flight = flights.find(f => f.id === selectedFlightId) || 
-                   liveRadarFlights.find(f => f.id === selectedFlightId);
-    
-    if (!flight) return;
-
-    // Use shared URL if available, else current origin
-    const shareUrl = `${window.location.origin}${window.location.pathname}?flightId=${flight.id}`;
-    const shareTitle = `Track Flight ${flight.flightNumber || flight.id} on SkyTrack`;
-    const shareText = `Check out the real-time status of ${flight.flightNumber || flight.id} (${flight.airline}).`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (err) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-          console.error('Error sharing:', err);
-        }
-      }
-    } else {
-      // Fallback: Copy to clipboard
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert('Tracking link copied to clipboard!');
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
-    }
-  };
-
-  const handleSearch = async (query: string) => {
-    setIsSearching(true);
-    const data = await searchFlights(query);
-    if (data.length > 0) {
-      setFlights(data);
-      setSelectedFlightId(data[0].id);
-      setIsSidebarOpen(true);
-    }
-    setIsSearching(false);
-  };
-
-  const handleSaveFlight = async (payload: Partial<Flight>) => {
-    const url = editingFlight ? `/api/flights/${editingFlight.id}` : '/api/flights';
-    const method = editingFlight ? 'PATCH' : 'POST';
-    
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      await fetchFlights();
-      setShowModal(false);
-      setEditingFlight(undefined);
-    }
-  };
-
-  const handleDeleteFlight = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm('Erase flight data from matrix?')) {
-      await fetch(`/api/flights/${id}`, { method: 'DELETE' });
-      await fetchFlights();
-      if (selectedFlightId === id) setSelectedFlightId(undefined);
-    }
-  };
-
-  const handleSelectFlight = useCallback((id: string) => {
-    setSelectedFlightId(id);
-    setIsSidebarOpen(true);
-  }, []);
 
   return (
     <div className="flex h-screen w-full bg-[#0B0F19] font-sans selection:bg-blue-500/30 overflow-hidden">
@@ -445,16 +114,10 @@ export default function App() {
                  setIsSidebarOpen={setIsSidebarOpen}
                  selectedFlight={selectedFlight}
                  selectedLiveFlight={selectedLiveFlight}
-                 handleShareFlight={handleShareFlight}
                  preferences={preferences}
                />
              )}
            </AnimatePresence>
-
-
-                          
-
-
         </div>
 
         <div className="h-12 bg-black border-t border-gray-800 flex items-center px-4 justify-between font-mono text-[10px]">
@@ -504,12 +167,11 @@ export default function App() {
         <div className="absolute inset-0 crt-overlay pointer-events-none opacity-20" />
       </main>
 
-      {/* Modal Integration */}
       <AnimatePresence>
         {showModal && (
           <FlightModal 
             flight={editingFlight}
-            onClose={() => { setShowModal(false); setEditingFlight(undefined); }} // Fix Issue #10
+            onClose={() => { setShowModal(false); setEditingFlight(undefined); }}
             onSave={handleSaveFlight}
           />
         )}
@@ -525,4 +187,3 @@ export default function App() {
     </div>
   );
 }
-

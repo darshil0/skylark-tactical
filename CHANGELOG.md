@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-04-29
+
+### Added
+- **Architectural Reorganization**: 
+  - Relocated backend logic to a dedicated `server/` directory.
+  - Implemented a custom `useSkyTrack` hook to separate core state management from the UI layer.
+  - Established new project conventions with `src/hooks`, `src/utils`, `src/constants`, and `src/styles` directories.
+- **Utility Extraction**: Moved high-frequency calculations (distance, alerts) to a standalone tactical utility module.
+
+### Fixed
+- **Code Maintainability**: Drastically reduced `App.tsx` complexity, improving component readability and testability.
+- **Import Paths**: Synchronized all stylesheet and asset imports with the new project structure.
+
 ## [1.7.0] - 2026-04-29
 
 ### Added

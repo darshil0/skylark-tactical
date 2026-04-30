@@ -2,7 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
-import { configDotenv } from "./server/dotenv.ts";
+import { configDotenv } from "./dotenv.ts";
 import { z } from "zod";
 
 configDotenv();
