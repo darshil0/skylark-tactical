@@ -19,7 +19,6 @@ export function useSkyTrack() {
   const [locationError, setLocationError] = useState<string | undefined>();
   const [isTelemetryLoading, setIsTelemetryLoading] = useState(false);
   const [activeAlerts, setActiveAlerts] = useState<Set<string>>(new Set());
-  const [lastAlertCount, setLastAlertCount] = useState(0);
 
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     const saved = localStorage.getItem('skytrack_preferences');

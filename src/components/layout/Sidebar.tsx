@@ -27,7 +27,7 @@ interface SidebarProps {
   fetchLiveRadar: () => void;
   selectedFlightId?: string;
   handleSelectFlight: (id: string) => void;
-  handleDeleteFlight: (id: string, e: React.MouseEvent) => void;
+  handleDeleteFlight: (id: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({

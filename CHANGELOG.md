@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2026-04-29
+
+### Added
+- **Path Aliasing**: Implemented `@/`, `@components/`, `@hooks/`, etc., across `tsconfig.json` and `vite.config.ts` for cleaner imports.
+- **Development Proxy**: Configured Vite proxy settings to automatically redirect API requests to the local Express server.
+- **Project Hygiene**: Significantly expanded `.gitignore` and refined `.env.example` with setup instructions.
+
+### Fixed
+- **Configuration Hardening**: Standardized `postcss.config.js` and `tsconfig.json` to include both frontend and backend directories for full-stack type checking.
+
 ## [1.7.1] - 2026-04-29
 
 ### Added

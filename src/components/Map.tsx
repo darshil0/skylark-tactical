@@ -225,8 +225,8 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
             <line x1="0" y1="-15" x2="0" y2="15" stroke="#3B82F6" strokeWidth="0.5" opacity="0.1" />
           </g>
 
-          {/* Static Map Layer */}
-          {worldData && (
+          {/* Static Map Layer - Memoized for performance */}
+          {useMemo(() => worldData && (
             <g className="map-base">
               {worldData.features.map((feature, i: number) => (
                 <path
@@ -245,7 +245,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
                 opacity={0.1}
               />
             </g>
-          )}
+          ), [worldData, pathGenerator, transform.k])}
 
           {/* Weather Radar Layer */}
           {preferences?.mapLayers?.weather && (
@@ -297,13 +297,12 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
           )}
 
           {/* Airspace Layer */}
-          {preferences?.mapLayers?.airspace && (
+          {useMemo(() => preferences?.mapLayers?.airspace && (
             <g className="airspace-layer">
                {airspaceData.map((sector) => {
                  const pos = projection([sector.center.lng, sector.center.lat]);
                  if (!pos) return null;
                  
-                 // Draw a tactical octagonal boundary
                  const radius = 60 / transform.k;
                  const points = [];
                  for (let i = 0; i < 8; i++) {
@@ -340,7 +339,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
                  );
                })}
             </g>
-          )}
+          ), [preferences?.mapLayers?.airspace, airspaceData, projection, transform.k])}
 
           {/* Dynamic Flights Layer */}
           <g className="flights">
