@@ -16,7 +16,7 @@ export async function getLiveWeatherOverlay(): Promise<WeatherCell[]> {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-    contents: "Identify the current top 10 most intense weather systems (storms or high precipitation areas) globally. Provide their exact coordinates (lat, lng), intensity (0.1 to 1.0), and estimated radius of प्रभाव (in degrees).",
+    contents: "Identify the current top 10 most intense weather systems (storms or high precipitation areas) globally. Provide their exact coordinates (lat, lng), intensity (0.1 to 1.0), and estimated radius of influence (in degrees).",
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",

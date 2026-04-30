@@ -7,11 +7,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Full Type Safety hardening**: Enabled `strict` mode in `tsconfig.json` and eliminated `any` types across the entire codebase.
 - **Dependency Overhaul**: Updated all libraries to their latest major/stable versions, including Vite 8, Express 5, and TypeScript 6.
+- **Documentation Refinement**: Complete overhaul of `README.md` for technical accuracy, including updated stack details, security protocols, and architectural focus.
 
 ### Fixed
 - **Deprecated Logic Removal**: Replaced deprecated `substr` with `slice` in backend services.
 - **Environment Compatibility**: Improved AudioContext initialization to better handle legacy and modern browser shims without `any`.
 - **System Stability**: Verified and hardened all component interfaces against major library updates.
+- **Prompt Localization**: Standardized AI prompts to English across all surveillance services.
 
 ## [1.6.2] - 2026-04-29
 
