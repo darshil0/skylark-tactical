@@ -63,6 +63,17 @@ SkyTrack is engineered for high-frequency data updates and complex spatial visua
 -   **Optimized State Management**: Core surveillance logic is encapsulated in a custom `useSkyTrack` hook, minimizing re-renders across the UI and ensuring efficient telemetry ingestion.
 -   **Hardware-Accelerated Animations**: CRT scanlines and radar sweeps are offloaded to CSS animations and the GPU via `motion/react`.
 
+## Path Aliases
+
+SkyTrack uses established path aliases for cleaner imports and improved maintainability:
+
+-   **`@/*`**: Root `src` directory
+-   **`@components/*`**: Tactical UI components
+-   **`@hooks/*`**: Core surveillance logic hooks
+-   **`@utils/*`**: Geospatial and Signal utilities
+-   **`@services/*`**: AI and Telemetry ingestion services
+-   **`@constants/*`**: System operational defaults
+
 ## Technical Stack
 
 -   **Frontend**: React 19.2, **Vite 8.0**, Tailwind CSS 4.1
