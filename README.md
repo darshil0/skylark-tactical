@@ -2,6 +2,23 @@
 
 SkyTrack is a high-performance, real-time flight tracking application built with React, Vite, and D3.js. It features a tactical, air traffic control-inspired interface for monitoring global aviation data.
 
+---
+
+## 📑 Table of Contents
+1. [Features](#features)
+2. [Tactical Design Language](#tactical-design-language)
+3. [Surveillance Protocols](#surveillance-protocols)
+4. [Project Structure](#project-structure)
+5. [Performance Optimization](#performance-optimization)
+6. [Path Aliases](#path-aliases)
+7. [Technical Stack](#technical-stack)
+8. [API Configuration](#api-configuration)
+9. [Security & Reliability](#security--reliability)
+10. [Environment Variables](#environment-variables)
+11. [Development](#development)
+
+---
+
 ## Features
 
 -   **Tactical Map Interface**: A high-contrast, black-ops style map built with D3.js, supporting natural earth projections, smooth zooming, **animated flight trajectories**, and interactive map layers.

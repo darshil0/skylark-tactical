@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+---
+
+## 📑 Version Index
+- [1.7.2](#172---2026-04-29) - Configuration Hardening
+- [1.7.1](#171---2026-04-29) - Architectural Reorganization
+- [1.7.0](#170---2026-04-29) - Full Type Safety & Dependency Overhaul
+- [1.6.2](#162---2026-04-29) - Tactical UI Polish
+- [1.6.0](#160---2026-04-29) - AI Telemetry & History
+
+---
+
 ## [1.7.2] - 2026-04-29
 
 ### Added
