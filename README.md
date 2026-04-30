@@ -18,6 +18,31 @@ SkyTrack is a high-performance, real-time flight tracking application built with
 -   **Deep Linking & Sharing**: Easily share specific flight tracking data via generated URLs.
 -   **Adaptive Mobile Experience**: Fully optimized for mobile with a collapsible flight manifest and specialized touch interactions.
 
+## Tactical Design Language
+
+SkyTrack utilizes a custom-built design system optimized for high-stress surveillance environments:
+
+-   **Tactical Glassmorphism**: Secondary interface elements (modals, overlays) leverage a specialized glassmorphism layer with real-time backdrop filtering for depth and clarity.
+-   **Peripheral HUD Glows**: Critical data containers feature blue/red peripheral glows to guide the operator's eye toward active vectors and proximity warnings.
+-   **CRT Scanline Simulation**: A multi-layered CSS animation system simulates high-fidelity tactical CRT monitors, providing a unique immersive experience.
+
+## Surveillance Protocols
+
+### Proximity Alert System (PAS)
+
+The system continuously monitors the spatial relationship between the operator's geolocation and active flight vectors. When an object enters the defined radius:
+
+1.  **Visual Link**: A pulsing red vector blip appears on the map.
+2.  **HUD Warning**: A critical warning banner identifies the object's callsign.
+3.  **Audible Signal**: A synthesized warning tone is generated via the Web Audio API.
+
+### Vector Data Ingestion
+
+Telemetry is synchronized via a dual-feed system:
+
+-   **Core Database**: Locally persisted flights with detailed historical tracking.
+-   **OpenSky Live Feed**: Real-time global ADS-B data proxied through the Express backend to bypass browser CORS restrictions.
+
 ## Technical Stack
 
 -   **Frontend**: React 19, Vite 6, Tailwind CSS 4
@@ -37,6 +62,17 @@ The application includes a built-in Express server that handles:
 -   `PATCH /api/flights/:id`: Updates existing flight telemetry.
 -   `DELETE /api/flights/:id`: Removes a flight from the system.
 -   `GET /api/external/live-flights`: Proxy route for real-time ADS-B data from the OpenSky Network.
+
+## Security & Reliability
+
+### API Integrity
+- **CORS Protocol**: The Express server implements a dynamic CORS callback system that validates incoming requests against the `APP_URL` environment variable.
+- **Payload Validation**: All incoming flight registration and update requests are validated against a strict Zod schema to prevent state corruption.
+- **AI Response Sanitization**: The system includes defensive regex-based parsing to ensure Gemini AI responses are valid JSON before ingestion.
+
+### Data Privacy
+- **Client-Side Persistence**: User preferences (units, map layers, alert radius) are persisted locally in the browser to minimize server-side storage needs.
+- **Anonymization**: Simulated ATC logs utilize randomized sector identifiers to maintain a realistic yet secure operational environment.
 
 ## Environment Variables
 
