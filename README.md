@@ -44,6 +44,17 @@ Telemetry is synchronized via a dual-feed system:
 -   **Core Database**: Locally persisted flights with detailed historical tracking.
 -   **OpenSky Live Feed**: Real-time global ADS-B data proxied through the Express backend to bypass browser CORS restrictions.
 
+## Project Structure
+
+SkyTrack follows a modular architecture designed for high-fidelity surveillance performance:
+
+-   **/server**: Express 5.2 backend handling ADS-B proxying and flight database management.
+-   **/src/hooks**: Custom React hooks (e.g., `useSkyTrack`) encapsulating core surveillance logic and state.
+-   **/src/utils**: Tactical utilities for geospatial calculations and Web Audio signal generation.
+-   **/src/constants**: Centralized system preferences and operational defaults.
+-   **/src/components**: Hardened UI components organized by feature and layout.
+-   **/src/styles**: Global CSS with tactical scanline effects and design tokens.
+
 ## Technical Stack
 
 -   **Frontend**: React 19.2, **Vite 8.0**, Tailwind CSS 4.1
