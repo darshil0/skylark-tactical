@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
   - Established new project conventions with `src/hooks`, `src/utils`, `src/constants`, and `src/styles` directories.
 - **Utility Extraction**: Moved high-frequency calculations (distance, alerts) to a standalone tactical utility module.
 
+### Optimized
+- **Map Layer Memoization**: Significantly improved map rendering performance by memoizing static geographical and airspace layers.
+- **State Cycle Efficiency**: Refactored the core surveillance hook to eliminate redundant state variables and minimize re-render triggers.
+
 ### Fixed
 - **Code Maintainability**: Drastically reduced `App.tsx` complexity, improving component readability and testability.
 - **Import Paths**: Synchronized all stylesheet and asset imports with the new project structure.
