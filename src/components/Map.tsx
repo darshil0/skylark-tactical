@@ -160,7 +160,6 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
       .translate(-x, -y));
   }, [selectedFlightId, flights.find(f => f.id === selectedFlightId)?.currentPosition?.lat, flights.find(f => f.id === selectedFlightId)?.currentPosition?.lng]); 
 
-  const radarRotation = 0; // Handled by CSS or specific logic if needed, but keeping simple for now
 
   return (
     <div ref={containerRef} className="w-full h-full bg-[#030712] overflow-hidden relative border-b border-gray-800">

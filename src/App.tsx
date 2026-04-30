@@ -243,10 +243,13 @@ export default function App() {
     
     const initializeData = async () => {
       try {
-        const res = await fetch('/api/flights');
-        if (res.ok) {
+        await fetchFlights();
+        
+        // If no flights, populate with initial AI data
+        // Check local flights state after fetch
+        if (flights.length === 0) {
+          const res = await fetch('/api/flights');
           const data = await res.json();
-          setFlights(data);
           
           if (data.length === 0) {
             setIsSearching(true);
@@ -258,16 +261,8 @@ export default function App() {
                 body: JSON.stringify(f)
               });
             }
-            // Final refresh
-            const finalRes = await fetch('/api/flights');
-            if (finalRes.ok) {
-              const finalData = await finalRes.json();
-              setFlights(finalData);
-              if (finalData.length > 0 && !selectedFlightId) setSelectedFlightId(finalData[0].id);
-            }
+            await fetchFlights();
             setIsSearching(false);
-          } else if (data.length > 0 && !selectedFlightId) {
-            setSelectedFlightId(data[0].id);
           }
         }
       } catch (err) {
