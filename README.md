@@ -55,6 +55,14 @@ SkyTrack follows a modular architecture designed for high-fidelity surveillance 
 -   **/src/components**: Hardened UI components organized by feature and layout.
 -   **/src/styles**: Global CSS with tactical scanline effects and design tokens.
 
+## Performance Optimization
+
+SkyTrack is engineered for high-frequency data updates and complex spatial visualizations:
+
+-   **Layer Memoization**: Static map layers (boundaries, graticules, airspace) are memoized using React's `useMemo`, preventing expensive D3 path re-calculations during real-time flight vector updates.
+-   **Optimized State Management**: Core surveillance logic is encapsulated in a custom `useSkyTrack` hook, minimizing re-renders across the UI and ensuring efficient telemetry ingestion.
+-   **Hardware-Accelerated Animations**: CRT scanlines and radar sweeps are offloaded to CSS animations and the GPU via `motion/react`.
+
 ## Technical Stack
 
 -   **Frontend**: React 19.2, **Vite 8.0**, Tailwind CSS 4.1
