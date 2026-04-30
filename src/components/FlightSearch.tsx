@@ -33,6 +33,7 @@ export const FlightSearch: React.FC<FlightSearchProps> = ({ onSearch, onClear, i
       </div>
       <input
         type="text"
+        autoFocus
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Enter flight #, airport, or natural language query..."

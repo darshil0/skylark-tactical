@@ -63,12 +63,17 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
 
   // Load weather data when layer is enabled
   useEffect(() => {
-    if (preferences?.mapLayers?.weather && weatherData.length === 0 && !isWeatherLoading) {
-      setIsWeatherLoading(true);
-      getLiveWeatherOverlay().then(data => {
-        setWeatherData(data);
-        setIsWeatherLoading(false);
-      });
+    if (preferences?.mapLayers?.weather) {
+      if (weatherData.length === 0 && !isWeatherLoading) {
+        setIsWeatherLoading(true);
+        getLiveWeatherOverlay().then(data => {
+          setWeatherData(data);
+          setIsWeatherLoading(false);
+        });
+      }
+    } else {
+      // Cleanup weather data to save memory when layer is disabled
+      if (weatherData.length > 0) setWeatherData([]);
     }
   }, [preferences?.mapLayers?.weather]);
 
@@ -101,8 +106,9 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
 
   // Load static map data once
   useEffect(() => {
-    d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then((data: any) => {
-      setWorldData(topojson.feature(data, data.objects.countries) as any);
+    d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then((data) => {
+      const atlas = data as any;
+      setWorldData(topojson.feature(atlas, atlas.objects.countries) as unknown as GeoJSON.FeatureCollection);
     });
   }, []);
 
@@ -145,14 +151,14 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
     
     const transition = d3.select(svgRef.current)
       .transition()
-      .duration(1000) // Slightly longer for smoother deceleration
+      .duration(1000)
       .ease(d3.easeCubicInOut);
 
     zoomBehavior.transform(transition as any, d3.zoomIdentity
       .translate(dimensions.width / 2, dimensions.height / 2)
       .scale(k)
       .translate(-x, -y));
-  }, [selectedFlightId]); // Only re-run when selection changes
+  }, [selectedFlightId, flights.find(f => f.id === selectedFlightId)?.currentPosition?.lat, flights.find(f => f.id === selectedFlightId)?.currentPosition?.lng]); 
 
   const radarRotation = 0; // Handled by CSS or specific logic if needed, but keeping simple for now
 
@@ -223,7 +229,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
           {/* Static Map Layer */}
           {worldData && (
             <g className="map-base">
-              {worldData.features.map((feature: any, i: number) => (
+              {worldData.features.map((feature, i: number) => (
                 <path
                   key={`country-${i}`}
                   d={pathGenerator(feature) || ''}
@@ -233,7 +239,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
                 />
               ))}
               <path
-                d={pathGenerator(d3.geoGraticule().step([10, 10])() as any) || ''}
+                d={pathGenerator(d3.geoGraticule().step([10, 10])() as unknown as GeoJSON.GeometryObject) || ''}
                 fill="none"
                 stroke="#3B82F6"
                 strokeWidth={0.2 / transform.k}
@@ -568,10 +574,17 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
         )}
       </AnimatePresence>
 
-      {/* Radar Overlay Scan (Pure CSS animation for zero JS overhead) */}
+      {/* Radar Overlay Scan (Tactical Sweep) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
          <div className="w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
-         <div className="absolute top-1/2 left-1/2 w-[200vw] h-[200vh] -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-500/10" />
+         <motion.div 
+           animate={{ rotate: 360 }}
+           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+           className="absolute top-1/2 left-1/2 w-[200vw] h-[200vh] -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-500/10"
+           style={{ 
+             background: 'conic-gradient(from 0deg, transparent 0%, rgba(59,130,246,0.2) 10%, transparent 20%)'
+           }}
+         />
       </div>
 
       <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md p-3 border border-gray-800 rounded-sm text-[10px] font-mono text-blue-400/80 shadow-2xl">

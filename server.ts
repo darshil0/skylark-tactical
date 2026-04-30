@@ -95,7 +95,7 @@ async function startServer() {
 
   app.post("/api/flights", (req, res) => {
     try {
-      const data = flightSchema.parse({ ...req.body, id: Math.random().toString(36).substr(2, 9) });
+      const data = flightSchema.parse({ ...req.body, id: Math.random().toString(36).slice(2, 11) });
       flights.push(data);
       res.status(201).json(data);
     } catch (error) {

@@ -130,6 +130,7 @@ export const FlightModal: React.FC<FlightModalProps> = ({ flight, onClose, onSav
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-gray-500 uppercase">Flight No.</label>
               <input 
+                autoFocus
                 value={formData.flightNumber}
                 onChange={e => setFormData({...formData, flightNumber: e.target.value})}
                 className="w-full bg-black/50 border border-gray-800 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none" 

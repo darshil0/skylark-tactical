@@ -98,7 +98,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, p
                   {['dark', 'satellite', 'navigation'].map((style) => (
                     <button 
                       key={style}
-                      onClick={() => setLocalPrefs(p => ({ ...p, mapStyle: style as any }))}
+                      onClick={() => setLocalPrefs(p => ({ ...p, mapStyle: style as UserPreferences['mapStyle'] }))}
                       className={`text-[9px] py-2 rounded font-mono uppercase border border-gray-800 ${localPrefs.mapStyle === style ? 'bg-blue-900/40 text-blue-400 border-blue-500' : 'bg-gray-900 text-gray-600'}`}
                     >
                       {style}

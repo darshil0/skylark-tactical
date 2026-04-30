@@ -3,7 +3,7 @@ import { Flight } from "../types";
 
 let aiClient: GoogleGenAI | null = null;
 
-function getAiClient(): GoogleGenAI {
+export function getAiClient(): GoogleGenAI {
   if (!aiClient) {
     const key = process.env.GEMINI_API_KEY;
     if (!key) {
