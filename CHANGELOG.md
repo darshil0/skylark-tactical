@@ -21,8 +21,11 @@ All notable changes to this project will be documented in this file.
 - **Robust Validation**: Integrated `zod` for strict schema validation across all Express API routes and AI response parsing.
 - **Testing Infrastructure**: Established a `vitest` testing suite with initial coverage for API validation logic.
 - **UUID Integration**: Switched to `uuid` v4 for generating unique internal identifiers for flight records.
-
-### Changed
+- **Added a set of professional repository badges to the README. This includes:
+License & Activity: (MIT License and Last Commit status)
+Tech Stack: (TypeScript 6, React 19, and Vite 8)**
+ 
+ ### Changed
 - **AI Engine Update**: Bumped `@google/generative-ai` to v0.24.1 for enhanced search grounding capabilities.
 
 ### Fixed
