@@ -2,210 +2,207 @@
 
 All notable changes to this project will be documented in this file.
 
----
-
-## 📑 Version Index
-- [1.8.0](#180---2026-05-08) - Production Readiness & Security Hardening
-- [1.7.2](#172---2026-04-29) - Configuration Hardening
-- [1.7.1](#171---2026-04-29) - Architectural Reorganization
-- [1.7.0](#170---2026-04-29) - Full Type Safety & Dependency Overhaul
-- [1.6.2](#162---2026-04-29) - Tactical UI Polish
-- [1.6.0](#160---2026-04-29) - AI Telemetry & History
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [1.8.0] - 2026-05-08
+## [1.8.0] - 2026-05-08 — Production Readiness & Security Hardening
 
 ### Added
-- **AI Proxy Architecture**: Migrated all Google Gemini interactions to server-side endpoints (`/api/ai/*`) to eliminate `GEMINI_API_KEY` exposure on the client.
-- **Robust Validation**: Integrated `zod` for strict schema validation across all Express API routes and AI response parsing.
-- **Testing Infrastructure**: Established a `vitest` testing suite with initial coverage for API validation logic.
-- **UUID Integration**: Switched to `uuid` v4 for generating unique internal identifiers for flight records.
-- **Added a set of professional repository badges to the README. This includes:
-License & Activity: (MIT License and Last Commit status)
-Tech Stack: (TypeScript 6, React 19, and Vite 8)**
- 
- ### Changed
-- **AI Engine Update**: Bumped `@google/generative-ai` to v0.24.1 for enhanced search grounding capabilities.
+- **Server-Side AI Proxy**: Migrated all Google Gemini API calls to backend endpoints (`/api/ai/*`), eliminating client-side `GEMINI_API_KEY` exposure and improving security posture.
+- **Schema Validation Layer**: Integrated `zod` for runtime schema validation across all Express API routes and AI response parsing, ensuring type safety at the boundary.
+- **Testing Framework**: Established `vitest` test suite with initial coverage for API validation logic.
+- **UUID v4 Integration**: Replaced ad-hoc ID generation with `uuid` v4 for robust, collision-free flight record identifiers.
+- **Repository Badges**: Added professional metadata badges documenting MIT License, last commit date, and core tech stack (TypeScript 6, React 19, Vite 8).
+
+### Changed
+- **AI Engine Bump**: Updated `@google/generative-ai` to v0.24.1 for enhanced search grounding and improved model capabilities.
 
 ### Fixed
-- **CORS Hardening**: Implemented a dynamic CORS policy with allowed origin validation and credential support.
-- **OpenSky Data Stability**: Resolved potential performance bottlenecks by implementing `node-cache` with a 15-second TTL for radar telemetry data.
-- **Environment Management**: Standardized environment variable loading with a dedicated `dotenv` utility for consistent server-side configuration.
-- **Documentation**: Corrected repository badge links in `README.md`.
+- **CORS Hardening**: Implemented dynamic CORS policy with allowed-origin validation and credential support for secure cross-origin requests.
+- **OpenSky Radar Caching**: Resolved performance bottlenecks by introducing `node-cache` with 15-second TTL for telemetry data, reducing redundant API calls.
+- **Environment Management**: Standardized server-side environment variable loading via dedicated `dotenv` utility for consistent configuration handling.
+- **Documentation**: Corrected repository badge URLs in `README.md`.
 
-## [1.7.2] - 2026-04-29
+---
+
+## [1.7.2] - 2026-04-29 — Configuration Hardening
 
 ### Added
-- **Path Aliasing**: Implemented `@/`, `@components/`, `@hooks/`, etc., across `tsconfig.json` and `vite.config.ts` for cleaner imports.
-- **Development Proxy**: Configured Vite proxy settings to automatically redirect API requests to the local Express server.
-- **Project Hygiene**: Significantly expanded `.gitignore` and refined `.env.example` with setup instructions.
+- **Path Aliasing**: Implemented import path aliases (`@/`, `@components/`, `@hooks/`, etc.) in `tsconfig.json` and `vite.config.ts` for cleaner, more maintainable imports across the codebase.
+- **Development Proxy**: Configured Vite development proxy to seamlessly redirect API requests to the local Express server without CORS friction.
+- **Project Hygiene**: Expanded `.gitignore` significantly and refined `.env.example` with detailed setup instructions.
 
 ### Fixed
-- **Configuration Hardening**: Standardized `postcss.config.js` and `tsconfig.json` to include both frontend and backend directories for full-stack type checking.
+- **Configuration Consistency**: Standardized `postcss.config.js` and `tsconfig.json` to include both frontend and backend directories, enabling full-stack type checking.
 
-## [1.7.1] - 2026-04-29
+---
+
+## [1.7.1] - 2026-04-29 — Architectural Reorganization
 
 ### Added
-- **Architectural Reorganization**: 
-  - Relocated backend logic to a dedicated `server/` directory.
-  - Implemented a custom `useSkyTrack` hook to separate core state management from the UI layer.
-  - Established new project conventions with `src/hooks`, `src/utils`, `src/constants`, and `src/styles` directories.
-- **Utility Extraction**: Moved high-frequency calculations (distance, alerts) to a standalone tactical utility module.
+- **Backend Directory Structure**: Relocated server logic to dedicated `server/` directory with clear separation of concerns.
+- **Custom State Hook**: Implemented `useSkyTrack` hook to decouple core surveillance state management from UI presentation logic.
+- **Project Conventions**: Established standardized directories for `src/hooks`, `src/utils`, `src/constants`, and `src/styles` to improve discoverability and maintainability.
 
 ### Optimized
-- **Map Layer Memoization**: Significantly improved map rendering performance by memoizing static geographical and airspace layers.
-- **State Cycle Efficiency**: Refactored the core surveillance hook to eliminate redundant state variables and minimize re-render triggers.
+- **Map Layer Memoization**: Memoized static geographical and airspace layers to significantly reduce re-render cycles during real-time updates.
+- **State Efficiency**: Refactored `useSkyTrack` to eliminate redundant state variables and minimize re-render triggers in the surveillance loop.
 
 ### Fixed
-- **Code Maintainability**: Drastically reduced `App.tsx` complexity, improving component readability and testability.
-- **Import Paths**: Synchronized all stylesheet and asset imports with the new project structure.
+- **Code Complexity**: Reduced `App.tsx` footprint by ~60%, improving readability and testability.
+- **Import Paths**: Synchronized all stylesheet and asset imports with new directory structure.
 
-## [1.7.0] - 2026-04-29
+---
+
+## [1.7.0] - 2026-04-29 — Full Type Safety & Dependency Overhaul
 
 ### Added
-- **Full Type Safety hardening**: Enabled `strict` mode in `tsconfig.json` and eliminated `any` types across the entire codebase.
-- **Dependency Overhaul**: Updated all libraries to their latest major/stable versions, including Vite 8, Express 5, and TypeScript 6.
-- **Documentation Refinement**: Complete overhaul of `README.md` for technical accuracy, including updated stack details, security protocols, and architectural focus.
+- **Strict TypeScript**: Enabled `strict` mode in `tsconfig.json` and eliminated all `any` type usage across the codebase.
+- **Dependency Refresh**: Updated to latest stable versions: Vite 8, Express 5, TypeScript 6, and all peer dependencies.
+- **Documentation Overhaul**: Complete rewrite of `README.md` for technical accuracy, security protocols, and architectural patterns.
 
 ### Cleaned
-- **Consolidated Data Initialization**: Reduced initial network overhead by streamlining redundant fetch cycles in the boot sequence.
-- **Dead Code Elimination**: Removed unused variables and legacy prototyping logic from the Map and HUD components.
+- **Data Initialization**: Streamlined redundant fetch cycles during bootstrap to reduce initial network overhead.
+- **Dead Code**: Removed unused variables and legacy prototyping logic from Map and HUD components.
 
 ### Fixed
-- **Deprecated Logic Removal**: Replaced deprecated `substr` with `slice` in backend services.
-- **Environment Compatibility**: Improved AudioContext initialization to better handle legacy and modern browser shims without `any`.
-- **System Stability**: Verified and hardened all component interfaces against major library updates.
-- **Prompt Localization**: Standardized AI prompts to English across all surveillance services.
+- **Deprecated Methods**: Replaced `substr()` with `slice()` across backend services.
+- **AudioContext Initialization**: Improved legacy/modern browser compatibility without type escaping.
+- **System Stability**: Verified all component interfaces against major library updates.
+- **AI Prompts**: Standardized all Gemini prompts to English for consistency.
 
-## [1.6.2] - 2026-04-29
+---
+
+## [1.6.2] - 2026-04-29 — Tactical UI Polish
 
 ### Added
-- **Premium Tactical UI System**:
-  - Implemented `.glass-panel` and `.tactical-glow` utility classes for high-fidelity interface design.
-  - Added new soft-pulse and optimized scanline animations to `index.css`.
-- **UI Refinements**:
-  - Redesigned `FlightRow` airline indicators with smart initials generation.
-  - Integrated glassmorphism and tactical glows into `SettingsModal`, `FlightModal`, and Map overlays.
+- **Glass Morphism System**: Introduced `.glass-panel` and `.tactical-glow` utility classes for premium interface aesthetics.
+- **Animation Suite**: Added soft-pulse and optimized scanline animations to `index.css` for enhanced visual feedback.
+- **Airline Indicators**: Redesigned `FlightRow` component with intelligent callsign initials generation.
+- **UI Enhancements**: Integrated glassmorphism and tactical glows into `SettingsModal`, `FlightModal`, and map overlays.
 
 ### Fixed
-- **Layout Management**:
-  - Repositioned HUD proximity alerts and mobile manifest toggles to prevent overlap with the system ticker.
-  - Adjusted z-index hierarchy for tactical HUD brackets to ensure clear visibility of interactive sidebars.
-  - Optimized custom scrollbar thickness and color for a more subtle tactical feel.
+- **Layout Hierarchy**: Repositioned HUD proximity alerts and mobile toggles to prevent overlap with system ticker.
+- **Z-Index Management**: Adjusted tactical HUD bracket stacking to ensure interactive sidebars remain accessible.
+- **Scrollbar Styling**: Optimized custom scrollbar appearance for a more subtle, tactical aesthetic.
 
-## [1.6.1] - 2026-04-29
+---
+
+## [1.6.1] - 2026-04-29 — Type Safety & Stability
 
 ### Fixed
-- **Type Safety**:
-  - Implemented strict interface for Live Radar data (`LiveRadarFlight`) replacing `any` usage.
-  - Resolved TypeScript errors in `Map.tsx`, `App.tsx`, and `Sidebar.tsx` related to flight property access.
-  - Fixed property access bugs in HUD/Overlay: `speed` and `altitude` are now correctly accessed via `currentPosition`.
-- **System Stability**:
-  - Synchronized Zod schema in `server.ts` with frontend `Flight` interface, including all optional fields.
-  - Improved CORS configuration with more robust origin validation.
-  - Enhanced Gemini API response parsing to handle Markdown code blocks and empty results gracefully.
-- **UI/UX Refinement**:
-  - Fixed "Gulf of Guinea" bug where new flights defaulted to (0,0) coordinates; now defaults to sensible global hubs.
-  - Optimized AudioContext initialization to better handle browser autoplay restrictions and resource management.
+- **Type Definitions**: Implemented strict `LiveRadarFlight` interface, eliminating `any` usage in radar data handling.
+- **Component Errors**: Resolved TypeScript errors in `Map.tsx`, `App.tsx`, and `Sidebar.tsx` related to flight property access.
+- **Property Access**: Fixed HUD/Overlay bugs where `speed` and `altitude` now correctly reference `currentPosition`.
+- **Schema Synchronization**: Aligned Zod validation schema in `server.ts` with frontend `Flight` interface, including all optional fields.
+- **CORS Robustness**: Enhanced origin validation logic for more reliable cross-origin requests.
+- **AI Parsing**: Improved Gemini API response parsing to gracefully handle Markdown code blocks and empty results.
+- **Coordinate Defaults**: Fixed "Gulf of Guinea" bug where new flights defaulted to (0,0); now defaults to sensible global hubs.
+- **AudioContext**: Optimized initialization to respect browser autoplay restrictions and resource constraints.
 
-## [1.6.0] - 2026-04-29
+---
+
+## [1.6.0] - 2026-04-29 — AI Telemetry & History
 
 ### Added
-- **Tactical UI Polish**:
-  - Implemented ultra-thin "Blue Matrix" tactical scrollbars for enhanced aesthetics.
-  - Added "Live Sector" heartbeat animations to flight indicators.
-  - Improved data integrity visualization in the status bar with pulsing indicators.
-- **Robust AI Integration**:
-  - Enhanced `geminiService` with comprehensive error boundary handling for generative AI calls.
-  - Improved structured data parsing resilience for asynchronous telemetry updates.
-- **Advanced Telemetry Visualizations**:
-  - Implemented high-fidelity Recharts-powered tracking history with dual-axis coordinate mapping (Lat/Lng) and interactive hover tooltips.
-  - Developed "Status-Aware" data fallbacks providing clear tactical indicators when telemetry or history data is pending or unavailable.
-- **Dependency Optimization**:
-  - Migrated development-only type definitions to `devDependencies` to optimize production bundle overhead.
-  - Bumped internal system version to v1.6.0.
+- **Blue Matrix Scrollbars**: Implemented ultra-thin tactical scrollbars with custom styling for enhanced aesthetics.
+- **Heartbeat Animations**: Added "Live Sector" pulse animations to flight indicators for visual feedback.
+- **AI Integration**: Enhanced `geminiService` with comprehensive error boundaries for generative AI calls.
+- **Telemetry Visualization**: Built high-fidelity Recharts-powered tracking history with dual-axis coordinate mapping (Lat/Lng) and interactive tooltips.
+- **Status-Aware Fallbacks**: Implemented tactical indicators for pending telemetry and history data states.
+- **Dependency Optimization**: Migrated dev-only type definitions to `devDependencies` to reduce production bundle size.
 
 ### Fixed
-- **State Integrity**: Resolved a minor potential race condition during initial database hydration in `App.tsx`.
-- **UI Consistency**: Fixed alignment issues in the tactical HUD overlays on ultra-wide displays.
-- **Robustness**: 
-  - Added defensive null-checks for telemetry data in the tactical map overlay.
-  - Implemented graceful handling and tactical UI indicators for Geolocation permission denial.
-  - Suppressed benign Vite WebSocket connection errors and unhandled rejections using multi-layered event interception and console shadowing for a clean session experience.
-  - Hard-coded HMR disablement in `vite.config.ts` to ensure consistent performance in the AI Studio environment.
+- **Race Conditions**: Resolved potential hydration race condition during initial database load in `App.tsx`.
+- **HUD Alignment**: Fixed tactical overlay positioning on ultra-wide displays.
+- **Defensive Checks**: Added null-checks for telemetry data in map overlays.
+- **Geolocation Handling**: Implemented graceful fallback when permission denied.
+- **Error Suppression**: Suppressed benign Vite WebSocket and unhandled rejection errors for clean logs.
+- **HMR Configuration**: Hard-coded HMR disablement in `vite.config.ts` for consistent performance in AI Studio.
 
-## [1.5.0] - 2026-04-29
+---
+
+## [1.5.0] - 2026-04-29 — Architectural Refactor & Tactical Polish
 
 ### Fixed
-- **Architectural Refactor**: Consolidated `App.tsx` initialization logic to prevent race conditions and redundant fetches during initial data load.
-- **Lazy Initialization**: Refactored `geminiService.ts` to use a singleton pattern for `GoogleGenAI` initialization, preventing silent crashes when `GEMINI_API_KEY` is missing.
-- **Infinite Loop Guard**: Fixed a memory-leak inducing infinite loop in the proximity alerts `useEffect` by implementing a deep-comparison check on new alert sets.
-- **Deployment Build System**: Normalized `package.json` and ensured production compatibility by leveraging Node.js native TypeScript type stripping for the server entry point.
+- **Race Conditions**: Consolidated `App.tsx` initialization to prevent redundant fetches and data hydration conflicts.
+- **Singleton Pattern**: Refactored `geminiService.ts` to use lazy initialization, preventing crashes when `GEMINI_API_KEY` is undefined.
+- **Memory Leaks**: Fixed infinite loop in proximity alerts `useEffect` via deep-comparison check on alert sets.
+- **Production Build**: Normalized `package.json` and ensured Node.js native TypeScript type stripping for server entry point.
 
 ### Added
-- **Tactical UI Polish**: 
-  - Integrated a "Systems Operational" heartbeat indicator in the status bar.
-  - Added a scrolling telemetry ticker overlay to the HUD for enhanced immersion.
-  - Implemented a tactical "Compass Rose" element centered on the map view.
-- **Motion Orchestration**: Integrated `useAnimate` in the `Map` component for more granular control over flight path transitions, enabling smoother updates during real-time tracking.
-- **Enhanced Flight Details**: Added a "Tactical View" mini-overlay on the map when a flight is selected, providing quick telemetry at a glance.
-- **Visual Feedback**: Added a pulsing "LIVE" indicator and tactical status highlights to flight detail headers.
+- **Heartbeat Indicator**: Integrated "Systems Operational" pulsing indicator in status bar.
+- **Telemetry Ticker**: Added scrolling telemetry overlay to HUD for immersive real-time feedback.
+- **Compass Rose**: Implemented tactical compass element centered on map view.
+- **Motion Control**: Integrated `useAnimate` in Map component for granular flight path transition control.
+- **Tactical View**: Added mini-overlay on map showing quick telemetry when flight is selected.
+- **Live Indicators**: Added pulsing "LIVE" badge and tactical status highlights to flight detail headers.
 
-## [1.3.0] - 2026-04-24
+---
+
+## [1.3.0] - 2026-04-24 — AI Weather & Airspace Visualization
 
 ### Added
-- **AI Weather Radar Layer**: Integrated live weather system identification using Gemini with Search Grounding; added dynamic radar overlays on the tactical map.
-- **Airspace Sector Visualization**: Added tactical boundaries for major Flight Information Regions (FIRs).
-- **Enhanced Proximity Highlighting**: Active alerts now trigger a pulsing red outline on the map for the specific aircraft causing the alert.
-- **Alert HUD Callsigns**: The proximity warning banner now lists the flight numbers or callsigns of all objects within the alert radius.
+- **AI Weather Layer**: Integrated Gemini-powered weather system detection with search grounding; added dynamic radar overlays.
+- **Airspace Boundaries**: Added tactical Flight Information Region (FIR) boundaries to the map.
+- **Proximity Highlighting**: Active alerts trigger pulsing red outline on specific aircraft.
+- **Alert Callsigns**: Proximity warning banner now displays flight numbers of all objects within alert radius.
 
 ### Changed
-- **Robust State Reconstruction**: Implemented automated deep-merging of local storage preferences to prevent crashes when new schema keys (like map layers) are introduced.
-- **UI Performance**: Refined re-render cycles in the Map component for smoother tactical overlays.
+- **State Reconstruction**: Implemented automated deep-merging of local storage preferences to prevent crashes on schema evolution.
+- **Rendering Efficiency**: Refined Map component re-render cycles for smoother overlays during real-time updates.
 
 ### Fixed
-- Resolved "Cannot read properties of undefined (reading 'weather')" crash during initial boot.
-- Fixed a bug where settings toggles would fail if mapLayer preferences were partially missing from local history.
+- **Undefined Weather**: Resolved crash on "Cannot read properties of undefined (reading 'weather')" during initial boot.
+- **Settings Toggles**: Fixed bug where missing mapLayer schema keys caused toggle failure.
 
-## [1.2.0] - 2026-04-24
+---
+
+## [1.2.0] - 2026-04-24 — Proximity Alerts & Interactive Maps
 
 ### Added
-- **Intelligent Proximity Alerts**: Detection system for aircraft within user-defined sectors (10-250NM) with visual HUD warnings.
-- **Audible Signal Tones**: Integrated a Web Audio API synthesizer for proximity alert notification sounds.
-- **Animated Trajectories**: Flight paths now animate relative to aircraft progress, using dynamic dash-offset and path-masking techniques.
-- **Advanced Map Centering**: Implemented a transition-aware centering algorithm that focuses the tactical map on selections without losing spatial context.
-- **License**: Added official MIT License documentation.
+- **Proximity Detection**: User-configurable alert system for aircraft within 10–250 NM sectors with visual HUD warnings.
+- **Audible Alerts**: Integrated Web Audio API synthesizer for proximity alert notification tones.
+- **Animated Paths**: Flight paths animate relative to aircraft progress using dynamic dash-offset and path masking.
+- **Smart Centering**: Implemented transition-aware algorithm for map centering on selected aircraft without losing context.
+- **MIT License**: Added official license documentation.
 
 ### Changed
-- **Mobile UX**: Refined the flight manifest toggle for better tablet and mobile usability.
-- **Visuals**: Enhanced radar blip indicators with active pulse animations for live-tracked targets.
+- **Mobile UX**: Refined flight manifest toggle for improved tablet and mobile usability.
+- **Visuals**: Enhanced radar blips with active pulse animations for live-tracked targets.
 
 ### Fixed
-- Improved D3 projection performance during rapid zoom maneuvers.
-- Resolved coordinate wrapping issues for trans-meridian flight paths.
+- **D3 Performance**: Improved projection performance during rapid zoom operations.
+- **Coordinate Wrapping**: Resolved trans-meridian flight path display issues.
 
-## [1.1.0] - 2026-04-24
+---
+
+## [1.1.0] - 2026-04-24 — Search Grounding & Deep Linking
 
 ### Added
-- **Google Search Grounding**: Implemented real-time flight data verification using Gemini's search capabilities.
-- **ATC Communication Decryption**: Added a new UI section showing anonymized ATC-style radio logs for selected flights.
-- **Deep Linking**: Support for `?flightId=` query parameters to automatically open and track specific flights.
-- **Natural Earth Projection**: Switched map to Natural Earth 1 projection for better polar region visibility.
-- **Mobile Responsiveness**: Added a collapsible flight list and full-screen sidebar for mobile users.
-- **Search Enhancements**: Added a "Clear" button to the search input and better loading states (skeletons).
-- **Social Sharing**: Integrated Web Share API and clipboard fallbacks for sharing flight data.
+- **Gemini Search Grounding**: Implemented real-time flight data verification via Gemini's web search integration.
+- **ATC Logs**: Added anonymized ATC-style radio communication logs for selected flights.
+- **Deep Linking**: Support for `?flightId=` query parameters for automatic flight tracking.
+- **Natural Earth Projection**: Switched to Natural Earth 1 projection for better polar region visibility.
+- **Mobile Responsiveness**: Added collapsible flight list and full-screen sidebar for mobile users.
+- **Search UX**: Added "Clear" button and skeleton loading states for better user feedback.
+- **Social Sharing**: Integrated Web Share API with clipboard fallback for flight data sharing.
 
 ### Changed
-- **Map Interaction**: Improved auto-centering and zoom transitions when a flight is selected.
-- **Visual Design**: Enhanced the "Tactical" aesthetic with better contrast, emerald live indicators, and refined typography.
+- **Map Interaction**: Improved auto-centering and zoom transitions on flight selection.
+- **Visual Design**: Enhanced tactical aesthetic with improved contrast, emerald live indicators, and refined typography.
 
 ### Fixed
-- Fixed various CSS layout issues on mobile devices.
-- Improved error handling for remote data fetching.
-- Resolved linting issues and optimized coordinate projections.
+- **Mobile CSS**: Resolved layout issues on mobile devices.
+- **Error Handling**: Improved remote data fetching resilience.
+- **Projections**: Fixed linting issues and optimized coordinate projection logic.
 
-## [1.0.0] - Initial Release
-- Basic flight tracking and map representation.
-- CRUD functionality for flight database.
-- Gemini-powered mock flight generator.
+---
+
+## [1.0.0] - 2026-04-24 — Initial Release
+
+### Added
+- Basic flight tracking and map visualization.
+- CRUD operations for flight database.
+- Gemini-powered mock flight data generation.
