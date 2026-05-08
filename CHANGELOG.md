@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 - **AI Engine Bump**: Updated `@google/generative-ai` to v0.24.1 for enhanced search grounding and improved model capabilities.
 
+### Changed
+- **AI Engine Update**: Bumped `@google/generative-ai` to v0.24.1 for enhanced search grounding capabilities.
+
 ### Fixed
 - **CORS Hardening**: Implemented dynamic CORS policy with allowed-origin validation and credential support for secure cross-origin requests.
 - **OpenSky Radar Caching**: Resolved performance bottlenecks by introducing `node-cache` with 15-second TTL for telemetry data, reducing redundant API calls.
