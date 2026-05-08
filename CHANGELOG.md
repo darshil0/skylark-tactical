@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ---
 
 ## 📑 Version Index
+- [1.8.0](#180---2026-05-08) - Production Readiness & Security Hardening
 - [1.7.2](#172---2026-04-29) - Configuration Hardening
 - [1.7.1](#171---2026-04-29) - Architectural Reorganization
 - [1.7.0](#170---2026-04-29) - Full Type Safety & Dependency Overhaul
@@ -12,6 +13,19 @@ All notable changes to this project will be documented in this file.
 - [1.6.0](#160---2026-04-29) - AI Telemetry & History
 
 ---
+
+## [1.8.0] - 2026-05-08
+
+### Added
+- **AI Proxy Architecture**: Migrated all Google Gemini interactions to server-side endpoints (`/api/ai/*`) to eliminate `GEMINI_API_KEY` exposure on the client.
+- **Robust Validation**: Integrated `zod` for strict schema validation across all Express API routes and AI response parsing.
+- **Testing Infrastructure**: Established a `vitest` testing suite with initial coverage for API validation logic.
+- **UUID Integration**: Switched to `uuid` v4 for generating unique internal identifiers for flight records.
+
+### Fixed
+- **CORS Hardening**: Implemented a dynamic CORS policy with allowed origin validation and credential support.
+- **OpenSky Data Stability**: Resolved potential performance bottlenecks by implementing `node-cache` with a 15-second TTL for radar telemetry data.
+- **Environment Management**: Standardized environment variable loading with a dedicated `dotenv` utility for consistent server-side configuration.
 
 ## [1.7.2] - 2026-04-29
 
