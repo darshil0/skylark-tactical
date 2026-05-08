@@ -30,7 +30,7 @@ SkyTrack is a high-performance, real-time flight tracking application built with
 -   **Intelligent Proximity Alerts**: Real-time detection of aircraft within a user-defined radius (up to 250NM), featuring pulsing visual highlights, callsign identification in the HUD, and specialized audible warning tones.
 -   **Live Radar Ingestion**: Real-time flight data fetching from ADSB-Exchange and Google Search Grounding to provide current aircraft positions.
 -   **AI Proxy Architecture (v1.8.0)**: All Google Gemini interactions are proxied through server-side endpoints (`/api/ai/*`), eliminating the need for client-side `GEMINI_API_KEY` exposure.
--   **AI-Powered Search**: Natural language search capabilities powered by **Gemini 1.5 Flash** (via `@google/generative-ai` v0.24) to find specific flights or simulate data.
+-   **AI-Powered Search**: Natural language search capabilities powered by **Gemini 1.5 Flash** (via `@google/genai` v1.51) to find specific flights or simulate data.
 -   **ATC Communication Decryption**: Anonymized, simulated ATC transcripts based on current flight sectors for enhanced situational awareness.
 -   **Flight Management**: Full CRUD operations for managing a personal database of tracked flights.
 -   **Deep Linking & Sharing**: Easily share specific flight tracking data via generated URLs.
