@@ -1,177 +1,379 @@
-# SkyTrack - Tactical Flight Surveillance System
+# SkyTrack - Real-Time Flight Tracking System
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat&logo=typescript)
-![React](https://img.shields.io/badge/React-19.2-blue?style=flat&logo=react)
+![React](https://img.shields.io/badge/React-19-blue?style=flat&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?style=flat&logo=vite)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 ![Last Commit](https://img.shields.io/github/last-commit/darshil0/skytrack?style=flat&color=blue)
 
-SkyTrack is a high-performance, real-time flight tracking application built with React, Vite, and D3.js. It features a tactical, air traffic control-inspired interface for monitoring global aviation data.
+SkyTrack is a high-performance, real-time flight tracking application built with React, Vite, and D3.js. It provides a tactical, air traffic control-inspired interface for monitoring global aviation data with proximity alerts, weather tracking, and AI-powered search.
 
 ---
 
 ## 📑 Table of Contents
+
 1. [Features](#features)
-2. [Tactical Design Language](#tactical-design-language)
-3. [Surveillance Protocols](#surveillance-protocols)
+2. [Design Language](#design-language)
+3. [How It Works](#how-it-works)
 4. [Project Structure](#project-structure)
-5. [Performance Optimization](#performance-optimization)
-6. [Path Aliases](#path-aliases)
-7. [Technical Stack](#technical-stack)
-8. [API Configuration](#api-configuration)
-9. [Security & Reliability](#security--reliability)
-10. [Environment Variables](#environment-variables)
-11. [Development](#development)
+5. [Performance](#performance)
+6. [Technical Stack](#technical-stack)
+7. [API Reference](#api-reference)
+8. [Environment Setup](#environment-setup)
+9. [Development](#development)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Features
 
--   **Tactical Map Interface**: A high-contrast, black-ops style map built with D3.js, supporting natural earth projections, smooth zooming, **animated flight trajectories**, and interactive map layers.
--   **AI Weather Radar Layer**: Live global weather system tracking powered by Gemini with Search Grounding, identifying storms and precipitation centers in real-time.
--   **Type-Safe Architecture (v1.8.0)**: Fully hardened codebase utilizing **TypeScript 6 Strict Mode** and a **Zero-Any Policy**. All data structures are enforced via Zod validation, ensuring mission-critical reliability.
--   **High-Fidelity HUD**: Enhanced tactical display with accurate velocity, altitude, and heading indicators synchronized with current positional vectors.
--   **Tactical Airspace Sectors**: Visualization of major Flight Information Regions (FIRs) and tactical airspace boundaries.
--   **Advanced Telemetry History**: High-fidelity data visualization for flight paths, featuring scaled Lat/Lng progression charts, interactive tooltips, and predictive fuel burn calculations.
--   **Intelligent Proximity Alerts**: Real-time detection of aircraft within a user-defined radius (up to 250NM), featuring pulsing visual highlights, callsign identification in the HUD, and specialized audible warning tones.
--   **Live Radar Ingestion**: Real-time flight data fetching from ADSB-Exchange and Google Search Grounding to provide current aircraft positions.
--   **AI Proxy Architecture (v1.8.0)**: All Google Gemini interactions are proxied through server-side endpoints (`/api/ai/*`), eliminating the need for client-side `GEMINI_API_KEY` exposure.
--   **AI-Powered Search**: Natural language search capabilities powered by **Gemini 1.5 Flash** (via `@google/generative-ai` v0.24) to find specific flights or simulate data.
--   **ATC Communication Decryption**: Anonymized, simulated ATC transcripts based on current flight sectors for enhanced situational awareness.
--   **Flight Management**: Full CRUD operations for managing a personal database of tracked flights.
--   **Deep Linking & Sharing**: Easily share specific flight tracking data via generated URLs.
--   **Adaptive Mobile Experience**: Fully optimized for mobile with a collapsible flight manifest and specialized touch interactions.
+- **Real-Time Flight Map**: D3.js-powered interactive map with natural earth projections, smooth zooming, animated flight trajectories, and tactical airspace sectors (FIRs).
+- **Proximity Alert System**: Monitors aircraft within a configurable radius (up to 250 NM) and triggers visual highlights, HUD banners, and audible warnings.
+- **Weather Radar Layer**: AI-powered weather tracking via Google Gemini with Search Grounding to identify active storm systems.
+- **Flight Search & Analysis**: Natural language flight search powered by Gemini 1.5 Flash; includes telemetry history, velocity/altitude tracking, and fuel burn calculations.
+- **Type-Safe Codebase**: Full TypeScript strict mode with Zod schema validation across all API boundaries and data structures.
+- **Flight Database**: CRUD operations for managing personal flight tracking records.
+- **ATC Communication Simulator**: Anonymized, sector-based ATC transcript generation for situational awareness.
+- **Mobile Optimized**: Responsive design with collapsible manifest and touch-optimized interactions.
+- **Shareable Links**: Deep linking for specific flight data via unique URLs.
 
-## Tactical Design Language
+## Design Language
 
-SkyTrack utilizes a custom-built design system optimized for high-stress surveillance environments:
+SkyTrack uses a tactical, high-contrast design system optimized for focus and readability:
 
--   **Tactical Glassmorphism**: Secondary interface elements (modals, overlays) leverage a specialized glassmorphism layer with real-time backdrop filtering for depth and clarity.
--   **Peripheral HUD Glows**: Critical data containers feature blue/red peripheral glows to guide the operator's eye toward active vectors and proximity warnings.
--   **CRT Scanline Simulation**: A multi-layered CSS animation system simulates high-fidelity tactical CRT monitors, providing a unique immersive experience.
--   **Dynamic Radar Sweeps**: Integrated visual radar sweeps provide constant system activity feedback.
+- **Glassmorphism Overlays**: Frosted glass effects on modals and secondary UI elements with real-time backdrop filtering.
+- **Peripheral Visual Cues**: Blue/red glow indicators on critical data containers to draw attention to active alerts.
+- **CRT Scanline Effects**: Multi-layered CSS animations simulate vintage CRT monitor aesthetics.
+- **Dynamic Radar Sweeps**: Continuous visual feedback indicating system activity and data refresh cycles.
 
-## Surveillance Protocols
+## How It Works
 
-### Proximity Alert System (PAS)
+### Data Flow
 
-The system continuously monitors the spatial relationship between the operator's geolocation and active flight vectors. When an object enters the defined radius:
+1. **Flight Ingestion**: Real-time ADS-B data fetched from OpenSky Network via proxied Express backend.
+2. **Local Persistence**: Flight records stored in browser localStorage and Express backend database.
+3. **Proximity Monitoring**: System continuously compares user geolocation against active flight positions every ~5 seconds.
+4. **Alert Dispatch**: When aircraft enters configured radius:
+   - Visual marker appears on map with pulsing animation
+   - HUD banner displays callsign and distance
+   - Web Audio API synthesizes warning tone (1000 Hz, 200 ms)
 
-1.  **Visual Link**: A pulsing red vector blip appears on the map.
-2.  **HUD Warning**: A critical warning banner identifies the object's callsign.
-3.  **Audible Signal**: A synthesized warning tone is generated via the Web Audio API.
+### AI Integration
 
-### Vector Data Ingestion
+Weather and flight search requests are proxied through Express backend to prevent client-side API key exposure:
 
-Telemetry is synchronized via a dual-feed system:
-
--   **Core Database**: Locally persisted flights with detailed historical tracking.
--   **OpenSky Live Feed**: Real-time global ADS-B data proxied through the Express backend to bypass browser CORS restrictions.
+```
+Client → /api/ai/weather → Google Gemini API → Response
+Client → /api/ai/search → Google Gemini API → Response
+```
 
 ## Project Structure
 
-SkyTrack follows a modular architecture designed for high-fidelity surveillance performance:
+```
+skytrack/
+├── server/                 # Express 5.2 backend
+│   ├── routes/            # API endpoints
+│   └── services/          # Flight & cache logic
+├── src/
+│   ├── components/        # React UI components
+│   ├── hooks/            # useSkyTrack, custom hooks
+│   ├── utils/            # Geospatial, Web Audio utilities
+│   ├── services/         # API clients
+│   ├── constants/        # Defaults & config
+│   ├── styles/           # Global CSS + scanline effects
+│   └── App.tsx
+├── vite.config.ts        # Vite + path aliases
+├── tsconfig.json         # TypeScript strict mode
+└── package.json
+```
 
--   **/server**: Express 5.2 backend handling ADS-B proxying and flight database management.
--   **/src/hooks**: Custom React hooks (e.g., `useSkyTrack`) encapsulating core surveillance logic and state.
--   **/src/utils**: Tactical utilities for geospatial calculations and Web Audio signal generation.
--   **/src/constants**: Centralized system preferences and operational defaults.
--   **/src/components**: Hardened UI components organized by feature and layout.
--   **/src/styles**: Global CSS with tactical scanline effects and design tokens.
+## Performance
 
-## Performance Optimization
+SkyTrack handles real-time updates efficiently through:
 
-SkyTrack is engineered for high-frequency data updates and complex spatial visualizations:
+- **Memoized Map Layers**: Static layers (boundaries, graticules, airspace) cached with `useMemo` to prevent D3 re-calculations during flight updates.
+- **Optimized State Management**: Core logic in `useSkyTrack` hook minimizes component re-renders.
+- **Hardware Acceleration**: CRT effects and radar sweeps offloaded to CSS animations and GPU.
+- **Server-Side Caching**: OpenSky data cached for 15 seconds via node-cache to reduce API calls.
 
--   **Layer Memoization**: Static map layers (boundaries, graticules, airspace) are memoized using React's `useMemo`, preventing expensive D3 path re-calculations during real-time flight vector updates.
--   **Optimized State Management**: Core surveillance logic is encapsulated in a custom `useSkyTrack` hook, minimizing re-renders across the UI and ensuring efficient telemetry ingestion.
--   **Hardware-Accelerated Animations**: CRT scanlines and radar sweeps are offloaded to CSS animations and the GPU via `motion/react`.
-
-## Path Aliases
-
-SkyTrack uses established path aliases for cleaner imports and improved maintainability:
-
--   **`@/*`**: Root `src` directory
--   **`@components/*`**: Tactical UI components
--   **`@hooks/*`**: Core surveillance logic hooks
--   **`@utils/*`**: Geospatial and Signal utilities
--   **`@services/*`**: AI and Telemetry ingestion services
--   **`@constants/*`**: System operational defaults
+**Performance Targets:**
+- Map interaction latency: <16ms (60 FPS)
+- Proximity check interval: ~5 seconds
+- Flight data refresh: 10-30 seconds (OpenSky default)
 
 ## Technical Stack
 
--   **Frontend**: React 19.2, **Vite 8.0**, Tailwind CSS 4.1
--   **Animations**: Motion 12.3
--   **Backend**: Node.js 22+, **Express 5.2**, Zod 4.4
--   **Data Visualization**: D3.js 7.9, Recharts 3.8
--   **AI Engine**: Google Generative AI (**Gemini 1.5 Flash**) with Search Grounding
--   **Storage & Caching**: Node-Cache 5.1, UUID 14.0
--   **Testing**: Vitest 4.1
--   **Icons**: Lucide React 1.14
--   **Styling**: Tactical UI System with custom scanline effects and grid overlays
-
-## API Configuration
-
-The application includes a built-in Express server that handles:
-
--   `GET /api/flights`: Retrieves the manifest of tracked flights.
--   `POST /api/flights`: Adds a new flight to the tracking database.
--   `PATCH /api/flights/:id`: Updates existing flight telemetry.
--   `DELETE /api/flights/:id`: Removes a flight from the system.
--   `GET /api/external/live-flights`: Proxy route for real-time ADS-B data from the OpenSky Network.
-
-## Security & Reliability
-
-### API Integrity
-- **AI Proxy Architecture**: All Google Gemini interactions are proxied through server-side endpoints (`/api/ai/*`) to prevent `GEMINI_API_KEY` exposure on the client side.
-- **CORS Protocol**: The Express server implements a dynamic CORS callback system that validates incoming requests against the `APP_URL` environment variable.
-- **Robust Schema Validation**: All incoming flight registration, update requests, and AI responses are validated against strict Zod schemas across all Express API routes.
-- **Node-Cache Integration**: Implements server-side in-memory caching with a 15-second TTL for OpenSky radar data to ensure system stability and performance.
-- **AI Response Sanitization**: The system includes defensive regex-based parsing to ensure Gemini AI responses are valid JSON before ingestion.
-
-### Data Privacy
-- **Client-Side Persistence**: User preferences (units, map layers, alert radius) are persisted locally in the browser to minimize server-side storage needs.
-- **Anonymization**: Simulated ATC logs utilize randomized sector identifiers to maintain a realistic yet secure operational environment.
-
-## Environment Variables
-
-| Variable | Description |
+| Category | Technology |
 | :--- | :--- |
-| `GEMINI_API_KEY` | **Required**. Your Google AI Studio API key for flight search and telemetry analysis. |
-| `APP_URL` | Optional. The public URL of the application, used for CORS and sharing links. |
+| **Frontend** | React 19, Vite 8.0, Tailwind CSS 4.1 |
+| **Animations** | Motion 12.3 |
+| **Backend** | Node.js 22+, Express 5.2 |
+| **Data Viz** | D3.js 7.9, Recharts 3.8 |
+| **AI** | Google Generative AI (Gemini 1.5 Flash) |
+| **Validation** | Zod 4.4 |
+| **Storage** | Node-Cache 5.1, localStorage |
+| **Testing** | Vitest 4.1 |
+| **Icons** | Lucide React 1.14 |
+
+## API Reference
+
+### Flight Management
+
+#### `GET /api/flights`
+Retrieve all tracked flights.
+
+**Response:**
+```json
+[
+  {
+    "id": "uuid",
+    "callsign": "UAL456",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "altitude": 35000,
+    "heading": 180,
+    "velocity": 450,
+    "timestamp": "2025-01-15T12:00:00Z"
+  }
+]
+```
+
+#### `POST /api/flights`
+Add a new flight to tracking database.
+
+**Request Body:**
+```json
+{
+  "callsign": "UAL456",
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "altitude": 35000,
+  "heading": 180,
+  "velocity": 450
+}
+```
+
+**Response:** 201 Created, returns flight object with assigned `id`.
+
+#### `PATCH /api/flights/:id`
+Update existing flight telemetry.
+
+**Request Body:** (all fields optional)
+```json
+{
+  "altitude": 36000,
+  "heading": 185,
+  "velocity": 455
+}
+```
+
+**Response:** 200 OK, returns updated flight object.
+
+#### `DELETE /api/flights/:id`
+Remove flight from database.
+
+**Response:** 204 No Content
+
+### External Data
+
+#### `GET /api/external/live-flights`
+Proxy to OpenSky Network for real-time ADS-B data.
+
+**Query Parameters:**
+- `lamin`: Min latitude (default: -90)
+- `lamax`: Max latitude (default: 90)
+- `lomin`: Min longitude (default: -180)
+- `lomax`: Max longitude (default: 180)
+
+**Response:** OpenSky format with aircraft state vectors.
+
+**Note:** Responses cached for 15 seconds server-side.
+
+### AI Endpoints
+
+#### `POST /api/ai/search`
+Natural language flight search.
+
+**Request Body:**
+```json
+{
+  "query": "flights from New York to Los Angeles"
+}
+```
+
+**Response:**
+```json
+{
+  "results": [
+    {
+      "callsign": "DAL123",
+      "origin": "JFK",
+      "destination": "LAX",
+      "confidence": 0.95
+    }
+  ]
+}
+```
+
+#### `POST /api/ai/weather`
+Get current weather analysis for a region.
+
+**Request Body:**
+```json
+{
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "radius": 100
+}
+```
+
+**Response:**
+```json
+{
+  "status": "clear" | "scattered" | "severe",
+  "storms": [
+    { "lat": 40.8, "lng": -74.1, "intensity": "moderate" }
+  ],
+  "summary": "Clear skies with scattered thunderstorms to the west."
+}
+```
+
+**Error Codes:**
+- `400 Bad Request`: Invalid coordinates or missing required fields
+- `401 Unauthorized`: Missing GEMINI_API_KEY
+- `500 Internal Server Error`: Gemini API timeout or parsing error
+
+## Environment Setup
+
+### Prerequisites
+
+- **Node.js**: 22.0.0 or higher
+- **npm**: 10.5.0 or higher
+- **Google AI Studio API Key**: https://aistudio.google.com/apikey
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/darshil0/skytrack.git
+   cd skytrack
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Create `.env.local` file** in the root directory:
+   ```
+   GEMINI_API_KEY=your_api_key_here
+   APP_URL=http://localhost:5173
+   ```
+
+4. **Start development server** (both Express + Vite):
+   ```bash
+   npm run dev
+   ```
+   - Frontend: `http://localhost:5173`
+   - Backend: `http://localhost:3000`
+
+### Production Build
+
+```bash
+npm run build
+npm start
+```
 
 ## Development
 
-1.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
-2.  **Start the development server (includes Express + Vite)**:
-    ```bash
-    npm run dev
-    ```
-3.  **Build for production**:
-    ```bash
-    npm run build
-    ```
-4.  **Start production server**:
-    ```bash
-    npm start
-    ```
+### Project Commands
 
-### Testing
+| Command | Purpose |
+| :--- | :--- |
+| `npm run dev` | Start Express + Vite dev servers |
+| `npm run build` | Build React + Express for production |
+| `npm start` | Run production build |
+| `npm test` | Run all tests with Vitest |
+| `npx vitest` | Run tests in watch mode |
 
-SkyTrack uses **Vitest** for unit and integration testing.
+### Code Quality
 
-- **Run all tests**:
-    ```bash
-    npm test
-    ```
-- **Run tests in watch mode**:
-    ```bash
-    npx vitest
-    ```
+- **TypeScript Strict Mode**: Enabled in `tsconfig.json`
+- **Zero-Any Policy**: No implicit `any` types allowed
+- **Schema Validation**: All API inputs validated with Zod
+
+### Path Aliases
+
+Import cleaner with configured aliases:
+
+```typescript
+import { useSkyTrack } from '@hooks/useSkyTrack';
+import { calculateDistance } from '@utils/geospatial';
+import { ALERT_RADIUS } from '@constants/defaults';
+```
+
+## Troubleshooting
+
+### CORS Errors
+
+**Problem:** `Access to XMLHttpRequest blocked by CORS policy`
+
+**Solution:**
+- Ensure `APP_URL` environment variable matches your deployment URL
+- For local development, `APP_URL=http://localhost:5173` should work automatically
+- Verify Express server is running on port 3000
+
+### Missing API Key
+
+**Problem:** `Error: GEMINI_API_KEY not found`
+
+**Solution:**
+- Check `.env.local` file exists in root directory
+- Verify key is set: `echo $GEMINI_API_KEY`
+- Generate new key at https://aistudio.google.com/apikey
+
+### OpenSky Proxy Failures
+
+**Problem:** `GET /api/external/live-flights returns 502 Bad Gateway`
+
+**Solution:**
+- Check OpenSky Network status: https://status.adsbexchange.com
+- Verify network connectivity from your server
+- Review server logs: `npm run dev` shows proxy errors
+
+### Map Not Loading
+
+**Problem:** D3 map renders blank or frozen
+
+**Solution:**
+- Open DevTools (F12) and check Console for errors
+- Clear browser cache and localStorage
+- Verify browser supports WebGL (Chrome, Firefox, Safari, Edge)
+- Check if running behind corporate proxy; may need to whitelist d3js.org
+
+### Proximity Alerts Not Triggering
+
+**Problem:** Aircraft in radius but no alert fires
+
+**Solution:**
+- Verify geolocation permission granted in browser
+- Check browser console for geolocation errors
+- Confirm OpenSky has live data for your region (may be sparse in some areas)
+- Review proximity radius setting (default 50 NM)
+- Audio: Ensure browser allows Web Audio API; some restrictive environments block it
+
+### Slow Performance / High CPU
+
+**Problem:** Map laggy, animations stutter, high memory usage
+
+**Solution:**
+- Reduce number of tracked flights (manifest size)
+- Disable CRT scanline effects in settings (trades aesthetics for performance)
+- Check for memory leaks: DevTools → Performance tab
+- Update to latest Chrome/Firefox for better hardware acceleration
 
 ## License
 
 MIT
+
+---
