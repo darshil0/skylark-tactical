@@ -22,10 +22,14 @@ All notable changes to this project will be documented in this file.
 - **Testing Infrastructure**: Established a `vitest` testing suite with initial coverage for API validation logic.
 - **UUID Integration**: Switched to `uuid` v4 for generating unique internal identifiers for flight records.
 
+### Changed
+- **AI Engine Update**: Bumped `@google/generative-ai` to v0.24.1 for enhanced search grounding capabilities.
+
 ### Fixed
 - **CORS Hardening**: Implemented a dynamic CORS policy with allowed origin validation and credential support.
 - **OpenSky Data Stability**: Resolved potential performance bottlenecks by implementing `node-cache` with a 15-second TTL for radar telemetry data.
 - **Environment Management**: Standardized environment variable loading with a dedicated `dotenv` utility for consistent server-side configuration.
+- **Documentation**: Corrected repository badge links in `README.md`.
 
 ## [1.7.2] - 2026-04-29
 
