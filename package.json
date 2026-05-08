@@ -7,10 +7,11 @@
     "dev": "tsx server/index.ts",
     "build": "vite build",
     "start": "node server/index.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@google/genai": "^1.51.0",
+    "@google/generative-ai": "^0.24.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^6.0.1",
@@ -23,12 +24,14 @@
     "express": "^5.2.1",
     "lucide-react": "^1.14.0",
     "motion": "^12.38.0",
+    "node-cache": "^5.1.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-error-boundary": "^6.1.1",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
     "topojson-client": "^3.1.0",
+    "uuid": "^14.0.0",
     "zod": "^4.4.1"
   },
   "devDependencies": {
@@ -37,11 +40,14 @@
     "@types/d3-geo": "^3.1.0",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@types/topojson-client": "^3.1.5",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   }
 }

@@ -1,8 +1,8 @@
 import React from 'react';
-import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) {
+function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <div className="min-h-screen bg-[#080B14] flex items-center justify-center p-6 font-mono">
       <div className="max-w-md w-full bg-[#0B0F19] border border-red-900/50 rounded-lg p-8 space-y-6 shadow-[0_0_50px_rgba(220,38,38,0.1)]">
@@ -18,7 +18,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error, resetError
 
         <div className="bg-black/50 border border-gray-800 rounded p-4 overflow-auto max-h-32">
            <p className="text-[10px] text-gray-500 leading-relaxed font-mono italic">
-             {error.message}
+             {error instanceof Error ? error.message : String(error)}
            </p>
         </div>
 

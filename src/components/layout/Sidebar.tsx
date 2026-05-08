@@ -200,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <Edit2 className="w-3.5 h-3.5" />
                    </button>
                    <button 
-                      onClick={(e) => handleDeleteFlight(flight.id, e)}
+                      onClick={() => handleDeleteFlight(flight.id)}
                       className="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-red-500 hover:bg-red-900/20"
                    >
                       <Trash2 className="w-3.5 h-3.5" />

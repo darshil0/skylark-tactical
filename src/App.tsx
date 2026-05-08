@@ -114,6 +114,13 @@ export default function App() {
                  setIsSidebarOpen={setIsSidebarOpen}
                  selectedFlight={selectedFlight}
                  selectedLiveFlight={selectedLiveFlight}
+                 handleShareFlight={() => {
+                   const id = selectedFlight?.id || selectedLiveFlight?.id;
+                   if (id) {
+                     navigator.clipboard.writeText(`${window.location.origin}/?flight=${id}`);
+                     alert('Share link copied to clipboard');
+                   }
+                 }}
                  preferences={preferences}
                />
              )}
