@@ -76,8 +76,8 @@ export const HUD: React.FC<HUDProps> = ({
             <div className="flex gap-1.5 mt-1 overflow-x-auto max-w-[200px] scrollbar-hide">
               {Array.from(activeAlerts).map(id => {
                 const f = liveRadarActive 
-                  ? liveRadarFlights.find(rf => rf.id === id)
-                  : flights.find(df => df.id === id);
+                  ? liveRadarFlights.find(rf => rf.id === id) as any
+                  : flights.find(df => df.id === id) as any;
                 const fn = liveRadarActive ? (f?.callsign || f?.id) : f?.flightNumber;
                 return (
                   <span key={id} className="text-[10px] bg-white text-red-600 px-2 py-0.5 rounded-sm font-black whitespace-nowrap animate-pulse">

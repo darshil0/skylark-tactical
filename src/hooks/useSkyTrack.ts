@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Flight, UserLocation, UserPreferences, LiveRadarFlight } from '../types';
 import { getInitialFlights, getFlightTelemetry } from '../services/geminiService';
-import { calculateDistance, playAlertTone } from '../utils/tactical';
+import { playAlertTone } from '../utils/tactical';
+import { calculateDistance } from '../lib/utils';
 import { DEFAULT_PREFERENCES } from '../constants/preferences';
 
 export function useSkyTrack() {

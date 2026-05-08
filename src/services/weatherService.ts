@@ -1,7 +1,3 @@
-import { Type } from "@google/genai";
-import { getAiClient } from "./geminiService";
-
-
 export interface WeatherCell {
   id: string;
   lat: number;
@@ -12,43 +8,12 @@ export interface WeatherCell {
 }
 
 export async function getLiveWeatherOverlay(): Promise<WeatherCell[]> {
-  const ai = getAiClient();
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-    contents: "Identify the current top 10 most intense weather systems (storms or high precipitation areas) globally. Provide their exact coordinates (lat, lng), intensity (0.1 to 1.0), and estimated radius of influence (in degrees).",
-    config: {
-      tools: [{ googleSearch: {} }],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            id: { type: Type.STRING },
-            lat: { type: Type.NUMBER },
-            lng: { type: Type.NUMBER },
-            intensity: { type: Type.NUMBER },
-            radius: { type: Type.NUMBER },
-            type: { type: Type.STRING, enum: ['precipitation', 'wind', 'storm'] }
-          },
-          required: ["id", "lat", "lng", "intensity", "radius", "type"]
-        }
-      }
-    }
-  });
-
-    try {
-      const text = response.text;
-      if (!text) return [];
-      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-      return JSON.parse(cleanText);
-    } catch (e) {
-      console.error("Failed to parse weather data", e);
-      return [];
-    }
+    const res = await fetch('/api/ai/weather');
+    if (!res.ok) throw new Error('Weather fetch failed');
+    return await res.json();
   } catch (err) {
-    console.error("Weather generateContent failed:", err);
+    console.error("Weather fetch failed:", err);
     return [];
   }
 }

@@ -4,6 +4,9 @@ import path from "path";
 import cors from "cors";
 import { configDotenv } from "./dotenv.ts";
 import { z } from "zod";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { v4 as uuidv4 } from "uuid";
+import NodeCache from "node-cache";
 
 configDotenv();
 
@@ -53,6 +56,9 @@ const flightSchema = z.object({
 
 type Flight = z.infer<typeof flightSchema>;
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const radarCache = new NodeCache({ stdTTL: 15 });
+
 // Mock Database
 let flights: Flight[] = [
   {
@@ -95,7 +101,7 @@ async function startServer() {
 
   app.post("/api/flights", (req, res) => {
     try {
-      const data = flightSchema.parse({ ...req.body, id: Math.random().toString(36).slice(2, 11) });
+      const data = flightSchema.parse({ ...req.body, id: uuidv4() });
       flights.push(data);
       res.status(201).json(data);
     } catch (error) {
@@ -117,13 +123,196 @@ async function startServer() {
       flights[index] = { ...flights[index], ...updates };
       res.json(flights[index]);
     } catch (error) {
-      res.status(400).json({ error: "Validation failed" });
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation failed", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   });
 
   app.delete("/api/flights/:id", (req, res) => {
     flights = flights.filter(f => f.id !== req.params.id);
     res.status(204).send();
+  });
+
+  // AI Proxy Routes
+  app.post("/api/ai/search", async (req, res) => {
+    const { query } = req.body;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                id: { type: SchemaType.STRING },
+                flightNumber: { type: SchemaType.STRING },
+                airline: { type: SchemaType.STRING },
+                origin: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    code: { type: SchemaType.STRING },
+                    city: { type: SchemaType.STRING },
+                    lat: { type: SchemaType.NUMBER },
+                    lng: { type: SchemaType.NUMBER }
+                  },
+                  required: ["code", "city", "lat", "lng"]
+                },
+                destination: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    code: { type: SchemaType.STRING },
+                    city: { type: SchemaType.STRING },
+                    lat: { type: SchemaType.NUMBER },
+                    lng: { type: SchemaType.NUMBER }
+                  },
+                  required: ["code", "city", "lat", "lng"]
+                },
+                departureTime: { type: SchemaType.STRING },
+                arrivalTime: { type: SchemaType.STRING },
+                status: {
+                  type: SchemaType.STRING,
+                  enum: ["scheduled", "on-time", "delayed", "landed", "diverted"],
+                  format: "enum"
+                } as any,
+                currentPosition: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    lat: { type: SchemaType.NUMBER },
+                    lng: { type: SchemaType.NUMBER },
+                    altitude: { type: SchemaType.NUMBER },
+                    speed: { type: SchemaType.NUMBER },
+                    heading: { type: SchemaType.NUMBER }
+                  },
+                  required: ["lat", "lng", "altitude", "speed", "heading"]
+                },
+                progress: { type: SchemaType.NUMBER },
+                aircraftType: { type: SchemaType.STRING },
+                gate: { type: SchemaType.STRING },
+                atcLog: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING }
+                }
+              },
+              required: ["id", "flightNumber", "airline", "origin", "destination", "departureTime", "arrivalTime", "status", "progress"]
+            }
+          }
+        }
+      }, { apiVersion: 'v1beta' });
+
+      const prompt = `You are a real-time flight data and ATC surveillance engine. Use Google Search to find current, accurate flight information and relevant sector ATC communications for: "${query}".
+
+      Current global time: ${new Date().toISOString()}
+      Search for:
+      1. Real-time flight numbers and vector telemetry (lat/lng, altitude, speed).
+      2. Approximate ATC communications or simulated transcripts based on flight phase (climb, cruise, descent) and major ATC sectors nearby.
+
+      Return an array of flight objects following the schema. For every flight, include an "atcLog" array containing 3-5 lines of anonymized ATC-style radio comms.`;
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        tools: [{ googleSearchRetrieval: {} }] as any,
+      });
+
+      const response = result.response;
+      res.json(JSON.parse(response.text()));
+    } catch (error) {
+      console.error("AI Search failed:", error);
+      res.status(500).json({ error: "AI search failed" });
+    }
+  });
+
+  app.post("/api/ai/telemetry", async (req, res) => {
+    const { flight } = req.body;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.OBJECT,
+            properties: {
+              predictedFuelBurn: { type: SchemaType.STRING },
+              estimatedTimeToDestination: { type: SchemaType.STRING },
+              weatherAdvisories: {
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.STRING }
+              }
+            },
+            required: ["predictedFuelBurn", "estimatedTimeToDestination", "weatherAdvisories"]
+          }
+        }
+      }, { apiVersion: 'v1beta' });
+
+      const prompt = `Analyze the following flight and provide tactical telemetry predictions and safety advisories.
+
+      Flight: ${flight.flightNumber} (${flight.airline})
+      Route: ${flight.origin.city} (${flight.origin.code}) -> ${flight.destination.city} (${flight.destination.code})
+      Current Speed: ${flight.currentPosition?.speed || 'Unknown'} kts
+      Current Altitude: ${flight.currentPosition?.altitude || 'Unknown'} ft
+      Aircraft Type: ${flight.aircraftType || 'Commercial Jet'}
+
+      Predict based on current vectors and route:
+      1. Predicted fuel burn (total for route).
+      2. Accurate Estimated Time to Destination (ETD) expressed as "X hours Y minutes".
+      3. Potential en-route weather advisories or turbulence warnings based on the general route region.`;
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        tools: [{ googleSearchRetrieval: {} }] as any,
+      });
+
+      res.json(JSON.parse(result.response.text()));
+    } catch (error) {
+      console.error("AI Telemetry failed:", error);
+      res.status(500).json({ error: "AI telemetry analysis failed" });
+    }
+  });
+
+  app.get("/api/ai/weather", async (req, res) => {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                id: { type: SchemaType.STRING },
+                lat: { type: SchemaType.NUMBER },
+                lng: { type: SchemaType.NUMBER },
+                intensity: { type: SchemaType.NUMBER },
+                radius: { type: SchemaType.NUMBER },
+                type: {
+                  type: SchemaType.STRING,
+                  enum: ['precipitation', 'wind', 'storm'],
+                  format: "enum"
+                } as any
+              },
+              required: ["id", "lat", "lng", "intensity", "radius", "type"]
+            }
+          }
+        }
+      }, { apiVersion: 'v1beta' });
+
+      const prompt = "Identify the current top 10 most intense weather systems (storms or high precipitation areas) globally. Provide their exact coordinates (lat, lng), intensity (0.1 to 1.0), and estimated radius of influence (in degrees).";
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        tools: [{ googleSearchRetrieval: {} }] as any,
+      });
+
+      res.json(JSON.parse(result.response.text()));
+    } catch (error) {
+      console.error("AI Weather failed:", error);
+      res.status(500).json({ error: "AI weather analysis failed" });
+    }
   });
 
   // Proxy OpenSky Network for real-time data
@@ -134,6 +323,12 @@ async function startServer() {
       const lomin = req.query.lomin || -125;
       const lamax = req.query.lamax || 50;
       const lomax = req.query.lomax || -66;
+
+      const cacheKey = `radar_${lamin}_${lomin}_${lamax}_${lomax}`;
+      const cachedData = radarCache.get(cacheKey);
+      if (cachedData) {
+        return res.json(cachedData);
+      }
 
       const url = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
       const response = await fetch(url);
@@ -157,6 +352,7 @@ async function startServer() {
         on_ground: s[8]
       }));
 
+      radarCache.set(cacheKey, states);
       res.json(states);
     } catch (error) {
       console.error("OpenSky fetch failed:", error);

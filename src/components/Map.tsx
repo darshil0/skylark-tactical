@@ -28,9 +28,10 @@ const TraversedPath: React.FC<{
     animate(
       scope.current,
       { 
+        // @ts-ignore
         pathLength: progress, 
         opacity: isSelected ? 0.8 : 0.3 
-      },
+      } as any,
       { 
         duration: 2, 
         ease: "easeInOut" 
@@ -45,7 +46,7 @@ const TraversedPath: React.FC<{
       fill="none"
       stroke={isSelected ? '#3B82F6' : '#60A5FA'}
       strokeWidth={strokeWidth}
-      style={{ pathLength: 0, opacity: 0 }}
+      style={{ pathLength: 0, opacity: 0 } as any}
       className="pointer-events-none transition-all duration-500"
     />
   );
@@ -146,7 +147,7 @@ export const Map: React.FC<MapProps> = ({ flights, selectedFlightId, onSelectFli
     const flight = flights.find(f => f.id === selectedFlightId);
     if (!flight?.currentPosition) return;
 
-    const [x, y] = projection([flight.currentPosition.lng, flight.currentPosition.lat]);
+    const [x, y] = projection([flight.currentPosition.lng, flight.currentPosition.lat])!;
     const k = transform.k < 4 ? 6 : transform.k; // Deeper zoom for focus
     
     const transition = d3.select(svgRef.current)
