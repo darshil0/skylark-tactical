@@ -87,4 +87,7 @@ Use the following prefixes:
 6. Add or update **tests** for any new functionality.
 7. Update **documentation** (README, docstrings, comments) as needed.
 
+---
 
+## Code of Conduct
+Please be respectful and professional in all interactions. We aim to maintain a high-quality, mission-critical environment for all contributors.
