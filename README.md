@@ -372,6 +372,10 @@ import { ALERT_RADIUS } from '@constants/defaults';
 - Check for memory leaks: DevTools → Performance tab
 - Update to latest Chrome/Firefox for better hardware acceleration
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming conventions, commit message format, and PR guidelines before submitting.
+
 ## License
 
 MIT
